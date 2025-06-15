@@ -52,6 +52,7 @@ const EnhancedSearchFilters = ({
   ];
 
   const propertyTypes = [
+    { value: 'any', label: 'Any type' },
     { value: 'apartment', label: 'Apartment' },
     { value: 'house', label: 'House' },
     { value: 'condo', label: 'Condo' },
@@ -65,6 +66,7 @@ const EnhancedSearchFilters = ({
       ...filters,
       checkIn: checkInDate ? format(checkInDate, 'yyyy-MM-dd') : '',
       checkOut: checkOutDate ? format(checkOutDate, 'yyyy-MM-dd') : '',
+      propertyType: filters.propertyType === 'any' ? '' : filters.propertyType,
     };
     onSearch(searchFilters);
   };
@@ -105,7 +107,7 @@ const EnhancedSearchFilters = ({
       filters.guests > 1 ||
       filters.minPrice > 0 ||
       filters.maxPrice < 1000 ||
-      filters.propertyType !== '' ||
+      (filters.propertyType !== '' && filters.propertyType !== 'any') ||
       (filters.amenities && filters.amenities.length > 0) ||
       filters.instantBook
     );
@@ -234,14 +236,13 @@ const EnhancedSearchFilters = ({
               <div>
                 <Label className="text-sm font-medium">Property Type</Label>
                 <Select
-                  value={filters.propertyType}
+                  value={filters.propertyType || 'any'}
                   onValueChange={(value) => setFilters(prev => ({ ...prev, propertyType: value }))}
                 >
                   <SelectTrigger className="w-full mt-1">
                     <SelectValue placeholder="Any type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Any type</SelectItem>
                     {propertyTypes.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -431,14 +432,13 @@ const EnhancedSearchFilters = ({
           <div>
             <Label className="text-base font-semibold">Property Type</Label>
             <Select
-              value={filters.propertyType}
+              value={filters.propertyType || 'any'}
               onValueChange={(value) => setFilters(prev => ({ ...prev, propertyType: value }))}
             >
               <SelectTrigger className="w-full mt-2">
                 <SelectValue placeholder="Any type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any type</SelectItem>
                 {propertyTypes.map(type => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
