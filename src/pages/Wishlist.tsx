@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +9,12 @@ import Header from "@/components/Header";
 import PropertyCard from "@/components/PropertyCard";
 import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Type for the Supabase query response
+interface WishlistItemWithListing {
+  id: string;
+  listings: Listing | null;
+}
 
 const Wishlist = () => {
   const { user, loading: authLoading } = useAuth();
@@ -69,7 +74,7 @@ const Wishlist = () => {
         if (error) throw error;
 
         // Extract listings from the nested structure
-        const listings: Listing[] = data
+        const listings: Listing[] = (data as WishlistItemWithListing[])
           ?.map(item => item.listings)
           .filter((listing): listing is Listing => listing !== null) || [];
         
@@ -191,4 +196,3 @@ const Wishlist = () => {
 };
 
 export default Wishlist;
-
