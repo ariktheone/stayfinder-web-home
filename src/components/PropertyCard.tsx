@@ -18,6 +18,7 @@ interface Property {
   bedrooms: number;
   bathrooms: number;
   amenities: string[];
+  coordinates?: [number, number];
 }
 
 interface PropertyCardProps {

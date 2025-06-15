@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import SearchFilters from "@/components/SearchFilters";
 import PropertyCard from "@/components/PropertyCard";
 import Header from "@/components/Header";
+import Map from "@/components/Map";
 
 const properties = [
   {
@@ -23,7 +24,8 @@ const properties = [
     guests: 4,
     bedrooms: 2,
     bathrooms: 1,
-    amenities: ["WiFi", "Kitchen", "Parking", "AC"]
+    amenities: ["WiFi", "Kitchen", "Parking", "AC"],
+    coordinates: [-74.006, 40.7128] as [number, number]
   },
   {
     id: 2,
@@ -38,7 +40,8 @@ const properties = [
     guests: 6,
     bedrooms: 3,
     bathrooms: 2,
-    amenities: ["WiFi", "Kitchen", "Beach Access", "Pool"]
+    amenities: ["WiFi", "Kitchen", "Beach Access", "Pool"],
+    coordinates: [-80.1918, 25.7617] as [number, number]
   },
   {
     id: 3,
@@ -53,7 +56,8 @@ const properties = [
     guests: 8,
     bedrooms: 4,
     bathrooms: 3,
-    amenities: ["WiFi", "Fireplace", "Hot Tub", "Mountain View"]
+    amenities: ["WiFi", "Fireplace", "Hot Tub", "Mountain View"],
+    coordinates: [-106.8175, 39.1911] as [number, number]
   },
   {
     id: 4,
@@ -68,13 +72,15 @@ const properties = [
     guests: 2,
     bedrooms: 1,
     bathrooms: 1,
-    amenities: ["WiFi", "Kitchen", "Gym", "City View"]
+    amenities: ["WiFi", "Kitchen", "Gym", "City View"],
+    coordinates: [-122.4194, 37.7749] as [number, number]
   }
 ];
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,26 +164,53 @@ const Index = () => {
         </div>
       )}
 
-      {/* Featured Properties */}
+      {/* Map/List Toggle */}
+      <section className="container mx-auto px-4 py-6 border-b">
+        <div className="flex justify-center space-x-4">
+          <Button 
+            variant={!showMap ? "default" : "outline"}
+            onClick={() => setShowMap(false)}
+          >
+            List View
+          </Button>
+          <Button 
+            variant={showMap ? "default" : "outline"}
+            onClick={() => setShowMap(true)}
+          >
+            Map View
+          </Button>
+        </div>
+      </section>
+
+      {/* Map or Properties Section */}
       <section className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Featured Stays</h2>
-          <Badge variant="secondary" className="text-sm">
-            {properties.length} properties found
-          </Badge>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {properties.map((property, index) => (
-            <div 
-              key={property.id} 
-              className="animate-fade-in hover-scale"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <PropertyCard property={property} />
+        {showMap ? (
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">Property Locations</h2>
+            <Map properties={properties} />
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">Featured Stays</h2>
+              <Badge variant="secondary" className="text-sm">
+                {properties.length} properties found
+              </Badge>
             </div>
-          ))}
-        </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {properties.map((property, index) => (
+                <div 
+                  key={property.id} 
+                  className="animate-fade-in hover-scale"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <PropertyCard property={property} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
