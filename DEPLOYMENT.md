@@ -175,7 +175,7 @@ Update your OAuth app settings with your new Vercel domain:
 
 3. **Monitor Performance**:
    - Use Vercel's built-in analytics
-   - Set up error tracking with Sentry
+   - Set up error tracking
 
 ## Production Checklist
 
@@ -194,7 +194,6 @@ If you encounter issues:
 1. Check Vercel deployment logs
 2. Review Supabase function logs
 3. Check browser console for client-side errors
-4. Refer to the main README for troubleshooting
 
 ---
 
