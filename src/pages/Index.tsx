@@ -71,9 +71,9 @@ const Index = () => {
     handleSearch(emptyFilters);
   };
 
-  const handleUpdateSort = (sortBy: string) => {
+  const handleUpdateSort = (sortBy: 'price_low' | 'price_high' | 'rating' | 'distance') => {
     if (currentFilters) {
-      const updatedFilters = { ...currentFilters, sortBy };
+      const updatedFilters: SearchFilters = { ...currentFilters, sortBy };
       setCurrentFilters(updatedFilters);
       const sorted = applySorting(filteredListings, sortBy);
       setFilteredListings(sorted);
