@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Home, User, Menu, X, Heart, MessageCircle, Calendar, Search } from "lucide-react";
+import { Home, User, Menu, X, Heart, MessageCircle, Calendar, Search, Grid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,15 +12,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
   const { user, profile, signOut, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing you out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAuthAction = () => {
@@ -45,6 +60,10 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-gray-700 hover:text-rose-600 transition-colors">
               Explore
+            </Link>
+            <Link to="/all-listings" className="flex items-center space-x-1 text-gray-700 hover:text-rose-600 transition-colors">
+              <Grid className="h-4 w-4" />
+              <span>All Listings</span>
             </Link>
             {user && (
               <>
@@ -103,6 +122,10 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" />
                       Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/all-listings')}>
+                      <Grid className="mr-2 h-4 w-4" />
+                      All Listings
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/wishlist')}>
                       <Heart className="mr-2 h-4 w-4" />
@@ -168,6 +191,14 @@ const Header = () => {
               >
                 <Search className="h-4 w-4" />
                 <span>Explore</span>
+              </Link>
+              <Link 
+                to="/all-listings" 
+                className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Grid className="h-4 w-4" />
+                <span>All Listings</span>
               </Link>
               {user && (
                 <>
