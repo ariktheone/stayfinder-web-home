@@ -50,22 +50,28 @@ const Index = () => {
     
     try {
       await fetchListings(filters);
-      const sorted = applySorting(listings, filters.sortBy || 'price_low');
-      setFilteredListings(sorted);
     } catch (error) {
       console.error('Search error:', error);
     }
   };
 
-  const handleBackToHome = () => {
+  // Apply sorting when listings change after search
+  useEffect(() => {
+    if (hasSearched && listings.length >= 0 && currentFilters) {
+      const sorted = applySorting(listings, currentFilters.sortBy || 'price_low');
+      setFilteredListings(sorted);
+    }
+  }, [listings, hasSearched, currentFilters]);
+
+  const handleBackToHome = async () => {
     setHasSearched(false);
     setFilteredListings([]);
     setCurrentFilters(null);
     // Reset to original listings by fetching all listings without filters
-    fetchListings();
+    await fetchListings();
   };
 
-  const handleClearFilters = () => {
+  const handleClearFilters = async () => {
     const emptyFilters: SearchFilters = {
       location: '',
       checkIn: '',
@@ -78,7 +84,7 @@ const Index = () => {
       instantBook: false,
       sortBy: 'price_low'
     };
-    handleSearch(emptyFilters);
+    await handleSearch(emptyFilters);
   };
 
   const handleUpdateSort = (sortBy: 'price_low' | 'price_high' | 'rating' | 'distance') => {
