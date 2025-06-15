@@ -11,6 +11,7 @@ import Header from "@/components/Header";
 import StripePayment from "@/components/StripePayment";
 import PaymentDeadlineCard from "@/components/PaymentDeadlineCard";
 import NearbyListings from "@/components/NearbyListings";
+import ListingMap from "@/components/ListingMap";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNearbyListings } from "@/hooks/useNearbyListings";
@@ -264,6 +265,11 @@ const Listing = () => {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Map Section */}
+            <div className="mb-8">
+              <ListingMap currentListing={listing} nearbyListings={nearbyListings} />
             </div>
 
             {/* Nearby Listings */}
