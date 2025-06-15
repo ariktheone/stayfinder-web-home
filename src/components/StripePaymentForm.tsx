@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Initialize Stripe (you'll need to add your publishable key)
-const stripePromise = loadStripe("pk_test_51234567890"); // Replace with your actual publishable key
+// Initialize Stripe with a placeholder key - you'll need to replace this with your actual publishable key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "pk_test_placeholder");
 
 interface PaymentFormProps {
   bookingId: string;
