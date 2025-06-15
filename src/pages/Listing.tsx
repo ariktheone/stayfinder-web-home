@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import StripePayment from "@/components/StripePayment";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Listing as ListingType } from "@/types/database";
@@ -24,6 +25,9 @@ const Listing = () => {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const amenityIcons: { [key: string]: any } = {
     WiFi: Wifi,
@@ -85,7 +89,7 @@ const Listing = () => {
 
     try {
       const totalNights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
-      const totalAmount = totalNights * (listing?.price_per_night || 0);
+      const calculatedTotalAmount = totalNights * (listing?.price_per_night || 0);
 
       const { data: booking, error } = await supabase
         .from('bookings')
@@ -95,7 +99,7 @@ const Listing = () => {
           check_in: checkIn,
           check_out: checkOut,
           total_guests: guests,
-          total_amount: totalAmount,
+          total_amount: calculatedTotalAmount,
           status: 'pending'
         })
         .select()
@@ -103,12 +107,14 @@ const Listing = () => {
 
       if (error) throw error;
 
+      setBookingId(booking.id);
+      setTotalAmount(calculatedTotalAmount);
+      setShowPayment(true);
+
       toast({
         title: "Booking created!",
-        description: "Your booking request has been submitted successfully.",
+        description: "Please complete payment to confirm your reservation.",
       });
-
-      navigate('/bookings');
     } catch (error) {
       console.error('Error creating booking:', error);
       toast({
@@ -119,6 +125,14 @@ const Listing = () => {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Payment successful!",
+      description: "Your booking has been confirmed.",
+    });
+    navigate('/bookings');
   };
 
   if (loading) {
@@ -225,84 +239,94 @@ const Listing = () => {
 
           {/* Booking Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-2xl font-bold">
-                    ${Math.round((listing.price_per_night || 0) / 100)}
-                  </span>
-                  <span className="text-gray-600 text-base font-normal">/ night</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="checkin">Check-in</Label>
-                    <Input
-                      id="checkin"
-                      type="date"
-                      value={checkIn}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="checkout">Check-out</Label>
-                    <Input
-                      id="checkout"
-                      type="date"
-                      value={checkOut}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      min={checkIn || new Date().toISOString().split('T')[0]}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="guests">Guests</Label>
-                  <Input
-                    id="guests"
-                    type="number"
-                    value={guests}
-                    onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
-                    min={1}
-                    max={listing.max_guests}
-                  />
-                </div>
-
-                {checkIn && checkOut && (
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span>
-                        ${Math.round((listing.price_per_night || 0) / 100)} x{" "}
-                        {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
-                      </span>
-                      <span>
-                        ${Math.round(((listing.price_per_night || 0) / 100) * 
-                          Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                        )}
-                      </span>
+            {!showPayment ? (
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-2xl font-bold">
+                      ${Math.round((listing.price_per_night || 0) / 100)}
+                    </span>
+                    <span className="text-gray-600 text-base font-normal">/ night</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="checkin">Check-in</Label>
+                      <Input
+                        id="checkin"
+                        type="date"
+                        value={checkIn}
+                        onChange={(e) => setCheckIn(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
                     </div>
-                    <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                      <span>Total</span>
-                      <span>
-                        ${Math.round(((listing.price_per_night || 0) / 100) * 
-                          Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                        )}
-                      </span>
+                    <div>
+                      <Label htmlFor="checkout">Check-out</Label>
+                      <Input
+                        id="checkout"
+                        type="date"
+                        value={checkOut}
+                        onChange={(e) => setCheckOut(e.target.value)}
+                        min={checkIn || new Date().toISOString().split('T')[0]}
+                      />
                     </div>
                   </div>
-                )}
 
-                <Button 
-                  className="w-full" 
-                  onClick={handleBooking}
-                  disabled={bookingLoading || !checkIn || !checkOut}
-                >
-                  {bookingLoading ? "Creating Booking..." : "Reserve"}
-                </Button>
-              </CardContent>
-            </Card>
+                  <div>
+                    <Label htmlFor="guests">Guests</Label>
+                    <Input
+                      id="guests"
+                      type="number"
+                      value={guests}
+                      onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
+                      min={1}
+                      max={listing.max_guests}
+                    />
+                  </div>
+
+                  {checkIn && checkOut && (
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between mb-2">
+                        <span>
+                          ${Math.round((listing.price_per_night || 0) / 100)} x{" "}
+                          {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
+                        </span>
+                        <span>
+                          ${Math.round(((listing.price_per_night || 0) / 100) * 
+                            Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                        <span>Total</span>
+                        <span>
+                          ${Math.round(((listing.price_per_night || 0) / 100) * 
+                            Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button 
+                    className="w-full" 
+                    onClick={handleBooking}
+                    disabled={bookingLoading || !checkIn || !checkOut}
+                  >
+                    {bookingLoading ? "Creating Booking..." : "Reserve"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              bookingId && (
+                <StripePayment
+                  bookingId={bookingId}
+                  amount={totalAmount}
+                  onSuccess={handlePaymentSuccess}
+                />
+              )
+            )}
           </div>
         </div>
       </div>

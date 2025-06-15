@@ -15,7 +15,7 @@ import { useListings } from "@/hooks/useListings";
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [showMap, setShowMap] = useState(false);
+  const [showMapInSearch, setShowMapInSearch] = useState(false);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
@@ -128,13 +128,22 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex justify-between items-center mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="text-gray-600"
-                >
-                  More filters
-                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="text-gray-600"
+                  >
+                    More filters
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowMapInSearch(!showMapInSearch)}
+                    className="text-gray-600"
+                  >
+                    {showMapInSearch ? "Hide Map" : "Show Map"}
+                  </Button>
+                </div>
                 <Button 
                   className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 px-8"
                   onClick={handleSearch}
@@ -144,6 +153,16 @@ const Index = () => {
                 </Button>
               </div>
             </Card>
+
+            {/* Map in Search Section */}
+            {showMapInSearch && (
+              <div className="mt-6">
+                <Card className="p-4">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900">Search Area</h3>
+                  <GoogleMap listings={listings} />
+                </Card>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -163,63 +182,36 @@ const Index = () => {
         </div>
       )}
 
-      {/* Map/List Toggle */}
-      <section className="container mx-auto px-4 py-6 border-b">
-        <div className="flex justify-center space-x-4">
-          <Button 
-            variant={!showMap ? "default" : "outline"}
-            onClick={() => setShowMap(false)}
-          >
-            List View
-          </Button>
-          <Button 
-            variant={showMap ? "default" : "outline"}
-            onClick={() => setShowMap(true)}
-          >
-            Map View
-          </Button>
-        </div>
-      </section>
-
-      {/* Map or Properties Section */}
+      {/* Properties Section */}
       <section className="container mx-auto px-4 py-12">
-        {showMap ? (
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Property Locations</h2>
-            <GoogleMap listings={listings} />
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Featured Stays</h2>
+          <Badge variant="secondary" className="text-sm">
+            {listings.length} properties found
+          </Badge>
+        </div>
+        
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-64 bg-gray-300 rounded-lg mb-4"></div>
+                <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div>
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900">Featured Stays</h2>
-              <Badge variant="secondary" className="text-sm">
-                {listings.length} properties found
-              </Badge>
-            </div>
-            
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-64 bg-gray-300 rounded-lg mb-4"></div>
-                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {listings.map((listing, index) => (
+              <div 
+                key={listing.id} 
+                className="animate-fade-in hover-scale"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <PropertyCard listing={listing} />
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {listings.map((listing, index) => (
-                  <div 
-                    key={listing.id} 
-                    className="animate-fade-in hover-scale"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <PropertyCard listing={listing} />
-                  </div>
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         )}
       </section>
