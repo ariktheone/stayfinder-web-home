@@ -25,17 +25,17 @@ const EnhancedSearchFilters = ({
   initialFilters = null,
   compact = false 
 }: EnhancedSearchFiltersProps) => {
-  const [filters, setFilters] = useState<SearchFilters>(initialFilters || {
-    location: '',
-    checkIn: '',
-    checkOut: '',
-    guests: 1,
-    minPrice: 0,
-    maxPrice: 1000,
-    propertyType: '',
-    amenities: [],
-    instantBook: false,
-    sortBy: 'price_low'
+  const [filters, setFilters] = useState<SearchFilters>({
+    location: initialFilters?.location || '',
+    checkIn: initialFilters?.checkIn || '',
+    checkOut: initialFilters?.checkOut || '',
+    guests: initialFilters?.guests || 1,
+    minPrice: initialFilters?.minPrice || 0,
+    maxPrice: initialFilters?.maxPrice || 1000,
+    propertyType: initialFilters?.propertyType || '',
+    amenities: initialFilters?.amenities || [],
+    instantBook: initialFilters?.instantBook || false,
+    sortBy: initialFilters?.sortBy || 'price_low'
   });
 
   const [checkInDate, setCheckInDate] = useState<Date | undefined>(
@@ -52,7 +52,6 @@ const EnhancedSearchFilters = ({
   ];
 
   const propertyTypes = [
-    { value: 'any', label: 'Any type' },
     { value: 'apartment', label: 'Apartment' },
     { value: 'house', label: 'House' },
     { value: 'condo', label: 'Condo' },
@@ -66,7 +65,6 @@ const EnhancedSearchFilters = ({
       ...filters,
       checkIn: checkInDate ? format(checkInDate, 'yyyy-MM-dd') : '',
       checkOut: checkOutDate ? format(checkOutDate, 'yyyy-MM-dd') : '',
-      propertyType: filters.propertyType === 'any' ? '' : filters.propertyType,
     };
     onSearch(searchFilters);
   };
@@ -107,7 +105,7 @@ const EnhancedSearchFilters = ({
       filters.guests > 1 ||
       filters.minPrice > 0 ||
       filters.maxPrice < 1000 ||
-      (filters.propertyType !== '' && filters.propertyType !== 'any') ||
+      filters.propertyType !== '' ||
       (filters.amenities && filters.amenities.length > 0) ||
       filters.instantBook
     );
@@ -115,8 +113,8 @@ const EnhancedSearchFilters = ({
 
   if (compact) {
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Quick Location Search */}
+      <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl shadow-sm border">
+        {/* Location Search */}
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -124,12 +122,12 @@ const EnhancedSearchFilters = ({
               placeholder="Where to?"
               value={filters.location}
               onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-              className="pl-10 h-12"
+              className="pl-10 h-11 border-gray-200 focus:border-rose-300"
             />
           </div>
         </div>
 
-        {/* Quick Guests */}
+        {/* Guests */}
         <div className="w-24">
           <div className="relative">
             <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -138,42 +136,52 @@ const EnhancedSearchFilters = ({
               min="1"
               value={filters.guests}
               onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-              className="pl-10 h-12"
+              className="pl-10 h-11 border-gray-200 focus:border-rose-300"
             />
           </div>
         </div>
 
-        {/* Advanced Filters Popover */}
+        {/* Advanced Filters */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="h-12 relative">
+            <Button variant="outline" className="h-11 relative border-gray-200">
               <Filter className="h-4 w-4 mr-2" />
               Filters
               {hasActiveFilters() && (
                 <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  !
+                  {[
+                    filters.location,
+                    checkInDate,
+                    checkOutDate,
+                    filters.guests > 1,
+                    filters.minPrice > 0,
+                    filters.maxPrice < 1000,
+                    filters.propertyType,
+                    filters.amenities?.length,
+                    filters.instantBook
+                  ].filter(Boolean).length}
                 </span>
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-96 p-6" align="end">
+          <PopoverContent className="w-80 p-6" align="end">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-semibold">Filters</h3>
+                <h3 className="font-semibold text-gray-900">Filters</h3>
                 {hasActiveFilters() && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500">
                     Clear all
                   </Button>
                 )}
               </div>
 
-              {/* Date Range */}
+              {/* Dates */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Check-in</Label>
+                  <Label className="text-sm font-medium text-gray-700">Check-in</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <Button variant="outline" className="w-full justify-start text-left font-normal mt-1">
                         <Calendar className="mr-2 h-4 w-4" />
                         {checkInDate ? format(checkInDate, "MMM dd") : "Date"}
                       </Button>
@@ -188,12 +196,11 @@ const EnhancedSearchFilters = ({
                     </PopoverContent>
                   </Popover>
                 </div>
-
                 <div>
-                  <Label>Check-out</Label>
+                  <Label className="text-sm font-medium text-gray-700">Check-out</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <Button variant="outline" className="w-full justify-start text-left font-normal mt-1">
                         <Calendar className="mr-2 h-4 w-4" />
                         {checkOutDate ? format(checkOutDate, "MMM dd") : "Date"}
                       </Button>
@@ -212,10 +219,10 @@ const EnhancedSearchFilters = ({
 
               {/* Price Range */}
               <div>
-                <Label className="text-sm font-medium">Price Range (per night)</Label>
-                <div className="mt-2">
+                <Label className="text-sm font-medium text-gray-700">Price Range (per night)</Label>
+                <div className="mt-3">
                   <Slider
-                    value={[filters.minPrice || 0, filters.maxPrice || 1000]}
+                    value={[filters.minPrice, filters.maxPrice]}
                     onValueChange={([min, max]) => setFilters(prev => ({ 
                       ...prev, 
                       minPrice: min, 
@@ -225,7 +232,7 @@ const EnhancedSearchFilters = ({
                     step={10}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-sm text-gray-600 mt-1">
+                  <div className="flex justify-between text-sm text-gray-600 mt-2">
                     <span>${filters.minPrice}</span>
                     <span>${filters.maxPrice}+</span>
                   </div>
@@ -234,15 +241,19 @@ const EnhancedSearchFilters = ({
 
               {/* Property Type */}
               <div>
-                <Label className="text-sm font-medium">Property Type</Label>
+                <Label className="text-sm font-medium text-gray-700">Property Type</Label>
                 <Select
-                  value={filters.propertyType || 'any'}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, propertyType: value }))}
+                  value={filters.propertyType || "all"}
+                  onValueChange={(value) => setFilters(prev => ({ 
+                    ...prev, 
+                    propertyType: value === "all" ? "" : value 
+                  }))}
                 >
                   <SelectTrigger className="w-full mt-1">
                     <SelectValue placeholder="Any type" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">Any type</SelectItem>
                     {propertyTypes.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -252,7 +263,7 @@ const EnhancedSearchFilters = ({
                 </Select>
               </div>
 
-              <Button onClick={handleSearch} className="w-full bg-rose-500 hover:bg-rose-600">
+              <Button onClick={handleSearch} className="w-full bg-rose-500 hover:bg-rose-600 text-white">
                 <Search className="mr-2 h-4 w-4" />
                 Apply Filters
               </Button>
@@ -264,7 +275,7 @@ const EnhancedSearchFilters = ({
         <Button 
           onClick={handleSearch} 
           disabled={loading}
-          className="bg-rose-500 hover:bg-rose-600 text-white h-12 px-8"
+          className="bg-rose-500 hover:bg-rose-600 text-white h-11 px-6"
         >
           <Search className="mr-2 h-4 w-4" />
           {loading ? 'Searching...' : 'Search'}
@@ -286,7 +297,7 @@ const EnhancedSearchFilters = ({
               placeholder="Search destinations"
               value={filters.location}
               onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-              className="pl-10 h-12 border-gray-200"
+              className="pl-10 h-12 border-gray-200 focus:border-rose-300"
             />
           </div>
         </div>
@@ -343,7 +354,7 @@ const EnhancedSearchFilters = ({
               min="1"
               value={filters.guests}
               onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-              className="pl-10 h-12 border-gray-200"
+              className="pl-10 h-12 border-gray-200 focus:border-rose-300"
             />
           </div>
         </div>
@@ -361,7 +372,17 @@ const EnhancedSearchFilters = ({
             <span>More filters</span>
             {hasActiveFilters() && (
               <span className="bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-2">
-                !
+                {[
+                  filters.location,
+                  checkInDate,
+                  checkOutDate,
+                  filters.guests > 1,
+                  filters.minPrice > 0,
+                  filters.maxPrice < 1000,
+                  filters.propertyType,
+                  filters.amenities?.length,
+                  filters.instantBook
+                ].filter(Boolean).length}
               </span>
             )}
           </Button>
@@ -378,7 +399,9 @@ const EnhancedSearchFilters = ({
             <Label htmlFor="sortBy" className="text-sm">Sort by:</Label>
             <Select
               value={filters.sortBy}
-              onValueChange={(value: any) => setFilters(prev => ({ ...prev, sortBy: value }))}
+              onValueChange={(value: 'price_low' | 'price_high' | 'rating' | 'distance') => 
+                setFilters(prev => ({ ...prev, sortBy: value }))
+              }
             >
               <SelectTrigger className="w-40">
                 <SelectValue />
@@ -411,7 +434,7 @@ const EnhancedSearchFilters = ({
             <Label className="text-base font-semibold">Price Range (per night)</Label>
             <div className="mt-3">
               <Slider
-                value={[filters.minPrice || 0, filters.maxPrice || 1000]}
+                value={[filters.minPrice, filters.maxPrice]}
                 onValueChange={([min, max]) => setFilters(prev => ({ 
                   ...prev, 
                   minPrice: min, 
@@ -432,13 +455,17 @@ const EnhancedSearchFilters = ({
           <div>
             <Label className="text-base font-semibold">Property Type</Label>
             <Select
-              value={filters.propertyType || 'any'}
-              onValueChange={(value) => setFilters(prev => ({ ...prev, propertyType: value }))}
+              value={filters.propertyType || "all"}
+              onValueChange={(value) => setFilters(prev => ({ 
+                ...prev, 
+                propertyType: value === "all" ? "" : value 
+              }))}
             >
               <SelectTrigger className="w-full mt-2">
                 <SelectValue placeholder="Any type" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">Any type</SelectItem>
                 {propertyTypes.map(type => (
                   <SelectItem key={type.value} value={type.value}>
                     {type.label}
