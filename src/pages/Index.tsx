@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Listing, SearchFilters } from "@/types/database";
 import { useListings } from "@/hooks/useListings";
@@ -55,6 +54,23 @@ const Index = () => {
     }
   };
 
+  const handleDestinationClick = async (location: string) => {
+    const destinationFilters: SearchFilters = {
+      location: location,
+      checkIn: '',
+      checkOut: '',
+      guests: 1,
+      minPrice: 0,
+      maxPrice: 1000,
+      propertyType: '',
+      amenities: [],
+      instantBook: false,
+      sortBy: 'price_low'
+    };
+    
+    await handleSearch(destinationFilters);
+  };
+
   // Apply sorting when listings change after search
   useEffect(() => {
     if (hasSearched && listings.length >= 0 && currentFilters) {
@@ -107,7 +123,7 @@ const Index = () => {
         <>
           <HeroSection onSearch={handleSearch} loading={loading} />
           <FeaturesSection />
-          <PopularDestinations />
+          <PopularDestinations onDestinationClick={handleDestinationClick} />
           
           {/* Featured Listings Section */}
           <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 bg-white/30 section-spacing">

@@ -1,7 +1,11 @@
 
 import { TrendingUp } from "lucide-react";
 
-const PopularDestinations = () => {
+interface PopularDestinationsProps {
+  onDestinationClick?: (location: string) => void;
+}
+
+const PopularDestinations = ({ onDestinationClick }: PopularDestinationsProps) => {
   const destinations = [
     { 
       name: "New York", 
@@ -29,6 +33,12 @@ const PopularDestinations = () => {
     },
   ];
 
+  const handleDestinationClick = (destinationName: string) => {
+    if (onDestinationClick) {
+      onDestinationClick(destinationName);
+    }
+  };
+
   return (
     <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 section-spacing">
       <div className="container mx-auto">
@@ -45,8 +55,18 @@ const PopularDestinations = () => {
           {destinations.map((destination, index) => (
             <div
               key={destination.name}
-              className="relative rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer group hover-scale shadow-lg touch-manipulation"
+              className="relative rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer group hover-scale shadow-lg touch-manipulation hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
               style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => handleDestinationClick(destination.name)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleDestinationClick(destination.name);
+                }
+              }}
+              aria-label={`Search for stays in ${destination.name}`}
             >
               <div className="aspect-[4/5] bg-gradient-to-br from-gray-200 to-gray-300">
                 <img
@@ -58,14 +78,14 @@ const PopularDestinations = () => {
                   }}
                 />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-all duration-300"></div>
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
-                <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2 mobile-subtitle mobile-optimized">{destination.name}</h3>
-                <p className="text-xs sm:text-sm opacity-90 mb-1 mobile-text">{destination.description}</p>
-                <p className="text-xs sm:text-sm font-medium mobile-text">{destination.count}</p>
+                <h3 className="text-xl sm:text-2xl font-bold mb-1 sm:mb-2 mobile-subtitle mobile-optimized group-hover:text-white transition-colors duration-300">{destination.name}</h3>
+                <p className="text-xs sm:text-sm opacity-90 mb-1 mobile-text group-hover:opacity-100 transition-opacity duration-300">{destination.description}</p>
+                <p className="text-xs sm:text-sm font-medium mobile-text group-hover:text-rose-200 transition-colors duration-300">{destination.count}</p>
               </div>
               <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
-                <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 text-white text-xs sm:text-sm font-medium">
+                <div className="bg-white/20 backdrop-blur-sm rounded-full px-2 sm:px-3 py-1 text-white text-xs sm:text-sm font-medium group-hover:bg-rose-500/80 transition-colors duration-300">
                   Popular
                 </div>
               </div>
