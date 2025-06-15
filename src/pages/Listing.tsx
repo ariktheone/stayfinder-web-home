@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain } from "lucide-react";
@@ -28,6 +27,7 @@ const Listing = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [showPaymentDeadline, setShowPaymentDeadline] = useState(false);
 
   const amenityIcons: { [key: string]: any } = {
     WiFi: Wifi,
@@ -90,6 +90,7 @@ const Listing = () => {
     try {
       const totalNights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
       const calculatedTotalAmount = totalNights * (listing?.price_per_night || 0);
+      const paymentDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
 
       const { data: booking, error } = await supabase
         .from('bookings')
@@ -100,20 +101,30 @@ const Listing = () => {
           check_out: checkOut,
           total_guests: guests,
           total_amount: calculatedTotalAmount,
-          status: 'pending'
+          status: 'pending',
+          payment_deadline: paymentDeadline.toISOString()
         })
         .select()
         .single();
 
       if (error) throw error;
 
+      // Create payment deadline tracking record
+      await supabase
+        .from('booking_payment_deadlines')
+        .insert({
+          booking_id: booking.id,
+          payment_deadline: paymentDeadline.toISOString(),
+          reminder_sent: false
+        });
+
       setBookingId(booking.id);
       setTotalAmount(calculatedTotalAmount);
-      setShowPayment(true);
+      setShowPaymentDeadline(true);
 
       toast({
         title: "Booking created!",
-        description: "Please complete payment to confirm your reservation.",
+        description: "You have 48 hours to complete payment.",
       });
     } catch (error) {
       console.error('Error creating booking:', error);
@@ -125,6 +136,11 @@ const Listing = () => {
     } finally {
       setBookingLoading(false);
     }
+  };
+
+  const handlePaymentClick = () => {
+    setShowPayment(true);
+    setShowPaymentDeadline(false);
   };
 
   const handlePaymentSuccess = () => {
@@ -239,7 +255,14 @@ const Listing = () => {
 
           {/* Booking Card */}
           <div className="lg:col-span-1">
-            {!showPayment ? (
+            {showPaymentDeadline && bookingId ? (
+              <PaymentDeadlineCard
+                bookingId={bookingId}
+                paymentDeadline={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()}
+                totalAmount={totalAmount}
+                onPaymentClick={handlePaymentClick}
+              />
+            ) : !showPayment ? (
               <Card className="sticky top-24">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">

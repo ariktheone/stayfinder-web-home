@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      booking_payment_deadlines: {
+        Row: {
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          payment_deadline: string
+          reminder_sent: boolean | null
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_deadline: string
+          reminder_sent?: boolean | null
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_deadline?: string
+          reminder_sent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_payment_deadlines_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           check_in: string
@@ -17,6 +49,7 @@ export type Database = {
           guest_id: string
           id: string
           listing_id: string
+          payment_deadline: string | null
           status: string | null
           total_amount: number
           total_guests: number
@@ -28,6 +61,7 @@ export type Database = {
           guest_id: string
           id?: string
           listing_id: string
+          payment_deadline?: string | null
           status?: string | null
           total_amount: number
           total_guests: number
@@ -39,6 +73,7 @@ export type Database = {
           guest_id?: string
           id?: string
           listing_id?: string
+          payment_deadline?: string | null
           status?: string | null
           total_amount?: number
           total_guests?: number
@@ -115,7 +150,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cancel_expired_bookings: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

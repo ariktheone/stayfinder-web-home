@@ -27,6 +27,7 @@ export interface Booking {
   total_guests: number;
   total_amount: number;
   status: string;
+  payment_deadline?: string;
   created_at: string;
 }
 
