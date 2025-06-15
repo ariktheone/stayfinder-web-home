@@ -34,14 +34,28 @@ const Wishlist = () => {
   }, [user, authLoading, navigate]);
 
   const fetchWishlistItems = async () => {
+    if (!user) return;
+
     try {
-      // Get user's default wishlist
-      const { data: wishlist } = await supabase
+      setLoading(true);
+      
+      // Get user's default wishlist with better error handling
+      const { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .eq('is_default', true)
-        .single();
+        .maybeSingle();
+
+      if (wishlistError) {
+        console.error('Error fetching wishlist:', wishlistError);
+        toast({
+          title: "Error",
+          description: "Failed to load wishlist",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (wishlist) {
         // Get wishlist items with listing details
@@ -71,7 +85,10 @@ const Wishlist = () => {
           .eq('wishlist_id', wishlist.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching wishlist items:', error);
+          throw error;
+        }
 
         // Extract listings from the nested structure - listings is an array, so take the first item
         const listings: Listing[] = (data as WishlistItemWithListing[])
@@ -79,6 +96,9 @@ const Wishlist = () => {
           .filter((listing): listing is Listing => listing !== null && listing !== undefined) || [];
         
         setWishlistItems(listings);
+      } else {
+        // No wishlist found, set empty array
+        setWishlistItems([]);
       }
     } catch (error) {
       console.error('Error fetching wishlist:', error);
@@ -93,14 +113,21 @@ const Wishlist = () => {
   };
 
   const removeFromWishlist = async (listingId: string) => {
+    if (!user) return;
+
     try {
       // Get user's default wishlist
-      const { data: wishlist } = await supabase
+      const { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .eq('is_default', true)
-        .single();
+        .maybeSingle();
+
+      if (wishlistError) {
+        console.error('Error fetching wishlist:', wishlistError);
+        throw wishlistError;
+      }
 
       if (wishlist) {
         const { error } = await supabase

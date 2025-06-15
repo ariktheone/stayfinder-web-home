@@ -27,22 +27,32 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
     if (!user) return;
 
     try {
-      // Get user's default wishlist
-      const { data: wishlist } = await supabase
+      // Get user's default wishlist with proper query format
+      const { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
         .eq('user_id', user.id)
         .eq('is_default', true)
-        .single();
+        .maybeSingle();
+
+      if (wishlistError) {
+        console.error('Error fetching wishlist:', wishlistError);
+        return;
+      }
 
       if (wishlist) {
         // Check if listing is in wishlist
-        const { data: wishlistItem } = await supabase
+        const { data: wishlistItem, error: itemError } = await supabase
           .from('wishlist_items')
           .select('id')
           .eq('wishlist_id', wishlist.id)
           .eq('listing_id', listingId)
           .maybeSingle();
+
+        if (itemError) {
+          console.error('Error checking wishlist item:', itemError);
+          return;
+        }
 
         setIsInWishlist(!!wishlistItem);
       }
@@ -65,16 +75,21 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
 
     try {
       // Get user's default wishlist
-      let { data: wishlist } = await supabase
+      let { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
         .eq('user_id', user.id)
         .eq('is_default', true)
-        .single();
+        .maybeSingle();
+
+      if (wishlistError) {
+        console.error('Error fetching wishlist:', wishlistError);
+        throw wishlistError;
+      }
 
       // Create default wishlist if it doesn't exist
       if (!wishlist) {
-        const { data: newWishlist, error } = await supabase
+        const { data: newWishlist, error: createError } = await supabase
           .from('wishlists')
           .insert({
             user_id: user.id,
@@ -84,7 +99,10 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
           .select()
           .single();
 
-        if (error) throw error;
+        if (createError) {
+          console.error('Error creating wishlist:', createError);
+          throw createError;
+        }
         wishlist = newWishlist;
       }
 
