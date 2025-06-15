@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain } from "lucide-react";
@@ -11,8 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import StripePayment from "@/components/StripePayment";
 import PaymentDeadlineCard from "@/components/PaymentDeadlineCard";
+import NearbyListings from "@/components/NearbyListings";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNearbyListings } from "@/hooks/useNearbyListings";
 import { Listing as ListingType } from "@/types/database";
 
 const Listing = () => {
@@ -30,6 +31,8 @@ const Listing = () => {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState(0);
   const [showPaymentDeadline, setShowPaymentDeadline] = useState(false);
+
+  const { nearbyListings, loading: nearbyLoading } = useNearbyListings(listing);
 
   const amenityIcons: { [key: string]: any } = {
     WiFi: Wifi,
@@ -209,9 +212,18 @@ const Listing = () => {
                 </div>
               </div>
 
-              <div className="flex items-center text-gray-600 mb-4">
-                <MapPin className="h-5 w-5 mr-2" />
-                <span>{listing.location}</span>
+              {/* Prominent Location Display */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center text-blue-800 mb-2">
+                  <MapPin className="h-6 w-6 mr-3 text-blue-600" />
+                  <div>
+                    <h2 className="text-lg font-semibold">Location</h2>
+                    <p className="text-xl font-bold">{listing.location}</p>
+                  </div>
+                </div>
+                <p className="text-blue-700 text-sm">
+                  Perfect location with easy access to local attractions and amenities
+                </p>
               </div>
 
               <div className="flex items-center space-x-6 text-gray-600 mb-6">
@@ -252,6 +264,11 @@ const Listing = () => {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Nearby Listings */}
+            <div className="mb-8">
+              <NearbyListings listings={nearbyListings} loading={nearbyLoading} />
             </div>
           </div>
 
