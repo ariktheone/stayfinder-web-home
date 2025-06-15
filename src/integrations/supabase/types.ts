@@ -154,6 +154,36 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_listing_with_nearby: {
+        Args: { listing_id: string; radius_km?: number }
+        Returns: Json
+      }
+      get_nearby_listings: {
+        Args: {
+          target_lat: number
+          target_lng: number
+          radius_km?: number
+          exclude_id?: string
+          max_results?: number
+        }
+        Returns: {
+          id: string
+          host_id: string
+          title: string
+          description: string
+          location: string
+          latitude: number
+          longitude: number
+          price_per_night: number
+          max_guests: number
+          bedrooms: number
+          bathrooms: number
+          amenities: string[]
+          images: string[]
+          type: string
+          distance_km: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

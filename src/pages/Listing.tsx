@@ -1,74 +1,48 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain } from "lucide-react";
+import { Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import StripePayment from "@/components/StripePayment";
 import PaymentDeadlineCard from "@/components/PaymentDeadlineCard";
 import NearbyListings from "@/components/NearbyListings";
-import ListingMap from "@/components/ListingMap";
+import InteractiveListingMap from "@/components/InteractiveListingMap";
+import BookingCard from "@/components/BookingCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNearbyListings } from "@/hooks/useNearbyListings";
-import { Listing as ListingType } from "@/types/database";
+import { useOptimizedListing } from "@/hooks/useOptimizedListing";
+import { useBookingCalculations } from "@/hooks/useBookingCalculations";
 
 const Listing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [listing, setListing] = useState<ListingType | null>(null);
-  const [loading, setLoading] = useState(true);
+  
+  const { listing, nearbyListings, loading, nearbyLoading } = useOptimizedListing(id);
+  
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const [totalAmount, setTotalAmount] = useState(0);
   const [showPaymentDeadline, setShowPaymentDeadline] = useState(false);
 
-  const { nearbyListings, loading: nearbyLoading } = useNearbyListings(listing);
+  const { totalAmount } = useBookingCalculations({
+    checkIn,
+    checkOut,
+    pricePerNight: listing?.price_per_night || 0
+  });
 
   const amenityIcons: { [key: string]: any } = {
     WiFi: Wifi,
     Parking: Car,
     "Beach Access": Waves,
     "Mountain View": Mountain,
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchListing();
-    }
-  }, [id]);
-
-  const fetchListing = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (error) throw error;
-      setListing(data);
-    } catch (error) {
-      console.error('Error fetching listing:', error);
-      toast({
-        title: "Listing not found",
-        description: "The listing you're looking for doesn't exist.",
-        variant: "destructive",
-      });
-      navigate('/');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleBooking = async () => {
@@ -94,9 +68,7 @@ const Listing = () => {
     setBookingLoading(true);
 
     try {
-      const totalNights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
-      const calculatedTotalAmount = totalNights * (listing?.price_per_night || 0);
-      const paymentDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
+      const paymentDeadline = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
       const { data: booking, error } = await supabase
         .from('bookings')
@@ -106,7 +78,7 @@ const Listing = () => {
           check_in: checkIn,
           check_out: checkOut,
           total_guests: guests,
-          total_amount: calculatedTotalAmount,
+          total_amount: totalAmount,
           status: 'pending',
           payment_deadline: paymentDeadline.toISOString()
         })
@@ -115,7 +87,6 @@ const Listing = () => {
 
       if (error) throw error;
 
-      // Create payment deadline tracking record
       await supabase
         .from('booking_payment_deadlines')
         .insert({
@@ -125,7 +96,6 @@ const Listing = () => {
         });
 
       setBookingId(booking.id);
-      setTotalAmount(calculatedTotalAmount);
       setShowPaymentDeadline(true);
 
       toast({
@@ -198,7 +168,7 @@ const Listing = () => {
               <img
                 src={listing.images?.[0] || '/placeholder.svg'}
                 alt={listing.title}
-                className="w-full h-96 object-cover rounded-lg"
+                className="w-full h-96 object-cover rounded-lg shadow-lg"
               />
             </div>
 
@@ -214,16 +184,16 @@ const Listing = () => {
               </div>
 
               {/* Prominent Location Display */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-100 border border-blue-200 rounded-lg p-6 mb-6">
                 <div className="flex items-center text-blue-800 mb-2">
                   <MapPin className="h-6 w-6 mr-3 text-blue-600" />
                   <div>
-                    <h2 className="text-lg font-semibold">Location</h2>
+                    <h2 className="text-lg font-semibold">Prime Location</h2>
                     <p className="text-xl font-bold">{listing.location}</p>
                   </div>
                 </div>
                 <p className="text-blue-700 text-sm">
-                  Perfect location with easy access to local attractions and amenities
+                  Perfectly situated with easy access to local attractions, dining, and transportation
                 </p>
               </div>
 
@@ -253,12 +223,12 @@ const Listing = () => {
 
             {/* Amenities */}
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {listing.amenities?.map((amenity) => {
                   const IconComponent = amenityIcons[amenity] || Wifi;
                   return (
-                    <div key={amenity} className="flex items-center space-x-2">
+                    <div key={amenity} className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                       <IconComponent className="h-5 w-5 text-gray-600" />
                       <span className="text-gray-700">{amenity}</span>
                     </div>
@@ -267,9 +237,9 @@ const Listing = () => {
               </div>
             </div>
 
-            {/* Map Section */}
+            {/* Interactive Map Section */}
             <div className="mb-8">
-              <ListingMap currentListing={listing} nearbyListings={nearbyListings} />
+              <InteractiveListingMap currentListing={listing} nearbyListings={nearbyListings} />
             </div>
 
             {/* Nearby Listings */}
@@ -288,84 +258,17 @@ const Listing = () => {
                 onPaymentClick={handlePaymentClick}
               />
             ) : !showPayment ? (
-              <Card className="sticky top-24">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">
-                      ${Math.round((listing.price_per_night || 0) / 100)}
-                    </span>
-                    <span className="text-gray-600 text-base font-normal">/ night</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="checkin">Check-in</Label>
-                      <Input
-                        id="checkin"
-                        type="date"
-                        value={checkIn}
-                        onChange={(e) => setCheckIn(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="checkout">Check-out</Label>
-                      <Input
-                        id="checkout"
-                        type="date"
-                        value={checkOut}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        min={checkIn || new Date().toISOString().split('T')[0]}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="guests">Guests</Label>
-                    <Input
-                      id="guests"
-                      type="number"
-                      value={guests}
-                      onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
-                      min={1}
-                      max={listing.max_guests}
-                    />
-                  </div>
-
-                  {checkIn && checkOut && (
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between mb-2">
-                        <span>
-                          ${Math.round((listing.price_per_night || 0) / 100)} x{" "}
-                          {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
-                        </span>
-                        <span>
-                          ${Math.round(((listing.price_per_night || 0) / 100) * 
-                            Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                        <span>Total</span>
-                        <span>
-                          ${Math.round(((listing.price_per_night || 0) / 100) * 
-                            Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button 
-                    className="w-full" 
-                    onClick={handleBooking}
-                    disabled={bookingLoading || !checkIn || !checkOut}
-                  >
-                    {bookingLoading ? "Creating Booking..." : "Reserve"}
-                  </Button>
-                </CardContent>
-              </Card>
+              <BookingCard
+                listing={listing}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                guests={guests}
+                bookingLoading={bookingLoading}
+                onCheckInChange={setCheckIn}
+                onCheckOutChange={setCheckOut}
+                onGuestsChange={setGuests}
+                onBooking={handleBooking}
+              />
             ) : (
               bookingId && (
                 <StripePayment
