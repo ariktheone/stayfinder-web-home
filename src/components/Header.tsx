@@ -2,18 +2,45 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, User, Home } from "lucide-react";
+import { Menu, User, Home, Calendar, Settings, LogOut, PlusCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out.",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
               <Home className="h-6 w-6 text-white" />
             </div>
@@ -22,35 +49,70 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <button
+              onClick={() => navigate('/')}
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+            >
               Explore
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Become a Host
-            </a>
-            <a href="#" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-              Help
-            </a>
+            </button>
+            {profile?.is_host && (
+              <button
+                onClick={() => navigate('/host')}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center space-x-1"
+              >
+                <PlusCircle className="h-4 w-4" />
+                <span>Host Dashboard</span>
+              </button>
+            )}
+            {user && (
+              <button
+                onClick={() => navigate('/bookings')}
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center space-x-1"
+              >
+                <Calendar className="h-4 w-4" />
+                <span>My Bookings</span>
+              </button>
+            )}
           </nav>
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            {!isLoggedIn ? (
+            {!user ? (
               <div className="hidden md:flex items-center space-x-2">
-                <Button variant="ghost" className="text-gray-700">
+                <Button variant="ghost" onClick={() => navigate('/auth')}>
                   Log in
                 </Button>
-                <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600">
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                >
                   Sign up
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
-                <Badge variant="secondary">Host</Badge>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span>Profile</span>
-                </Button>
+              <div className="hidden md:flex items-center space-x-3">
+                {profile?.is_host && (
+                  <Badge variant="secondary">Host</Badge>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/profile')}
+                    className="flex items-center space-x-2"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>{profile?.full_name || user.email?.split('@')[0]}</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="text-gray-600 hover:text-red-600"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -63,23 +125,69 @@ const Header = () => {
               </SheetTrigger>
               <SheetContent>
                 <div className="flex flex-col space-y-4 mt-8">
-                  <a href="#" className="text-lg font-medium text-gray-700 hover:text-blue-600">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left"
+                  >
                     Explore
-                  </a>
-                  <a href="#" className="text-lg font-medium text-gray-700 hover:text-blue-600">
-                    Become a Host
-                  </a>
-                  <a href="#" className="text-lg font-medium text-gray-700 hover:text-blue-600">
-                    Help
-                  </a>
-                  <div className="border-t pt-4 space-y-2">
-                    <Button className="w-full" variant="outline">
-                      Log in
-                    </Button>
-                    <Button className="w-full bg-gradient-to-r from-pink-500 to-rose-500">
-                      Sign up
-                    </Button>
-                  </div>
+                  </button>
+                  
+                  {user ? (
+                    <>
+                      <button
+                        onClick={() => navigate('/bookings')}
+                        className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
+                      >
+                        <Calendar className="h-5 w-5" />
+                        <span>My Bookings</span>
+                      </button>
+                      
+                      {profile?.is_host && (
+                        <button
+                          onClick={() => navigate('/host')}
+                          className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
+                        >
+                          <PlusCircle className="h-5 w-5" />
+                          <span>Host Dashboard</span>
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={() => navigate('/profile')}
+                        className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
+                      >
+                        <Settings className="h-5 w-5" />
+                        <span>Profile Settings</span>
+                      </button>
+                      
+                      <div className="border-t pt-4">
+                        <Button
+                          onClick={handleSignOut}
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="border-t pt-4 space-y-2">
+                      <Button 
+                        onClick={() => navigate('/auth')}
+                        className="w-full" 
+                        variant="outline"
+                      >
+                        Log in
+                      </Button>
+                      <Button 
+                        onClick={() => navigate('/auth')}
+                        className="w-full bg-gradient-to-r from-pink-500 to-rose-500"
+                      >
+                        Sign up
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
