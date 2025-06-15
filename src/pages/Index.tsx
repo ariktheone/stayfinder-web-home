@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Listing, SearchFilters } from "@/types/database";
 import { useListings } from "@/hooks/useListings";
 import Header from "@/components/Header";
@@ -15,6 +15,14 @@ const Index = () => {
   const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
+  const [originalListings, setOriginalListings] = useState<Listing[]>([]);
+
+  // Store original listings when they're first loaded
+  useEffect(() => {
+    if (listings.length > 0 && originalListings.length === 0) {
+      setOriginalListings(listings);
+    }
+  }, [listings, originalListings.length]);
 
   const applySorting = (listingsToSort: Listing[], sortBy: string) => {
     let sorted = [...listingsToSort];
@@ -53,6 +61,8 @@ const Index = () => {
     setHasSearched(false);
     setFilteredListings([]);
     setCurrentFilters(null);
+    // Reset to original listings by fetching all listings without filters
+    fetchListings();
   };
 
   const handleClearFilters = () => {
@@ -80,7 +90,8 @@ const Index = () => {
     }
   };
 
-  const displayListings = hasSearched ? filteredListings : listings;
+  // Use filteredListings when searched, otherwise use original listings for featured section
+  const displayListings = hasSearched ? filteredListings : (originalListings.length > 0 ? originalListings : listings);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
