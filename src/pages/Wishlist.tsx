@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -190,3 +191,4 @@ const Wishlist = () => {
 };
 
 export default Wishlist;
+
