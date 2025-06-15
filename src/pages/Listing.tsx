@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain, MapPin } from "lucide-react";
+import { 
+  Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain, MapPin, 
+  AirVent, Coffee, Tv, Utensils, Shirt, Wind, Snowflake, 
+  Flame, Shield, Baby, Dog, Cigarette, CigaretteOff, Dumbbell,
+  Trees, Waves as Pool, UtensilsCrossed, Microwave, Refrigerator,
+  WashingMachine, Hair, Iron, Sofa, Desk, FireExtinguisher,
+  Camera, Music, BookOpen, Gamepad2, Bike, Car as ParkingIcon
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -39,11 +46,128 @@ const Listing = () => {
     pricePerNight: listing?.price_per_night || 0
   });
 
+  // Comprehensive amenity icons mapping
   const amenityIcons: { [key: string]: any } = {
-    WiFi: Wifi,
-    Parking: Car,
+    // Internet & Technology
+    "WiFi": Wifi,
+    "Wi-Fi": Wifi,
+    "Internet": Wifi,
+    "TV": Tv,
+    "Television": Tv,
+    "Cable TV": Tv,
+    "Smart TV": Tv,
+    
+    // Kitchen & Dining
+    "Kitchen": Utensils,
+    "Full Kitchen": Utensils,
+    "Kitchenette": Utensils,
+    "Microwave": Microwave,
+    "Refrigerator": Refrigerator,
+    "Fridge": Refrigerator,
+    "Coffee Maker": Coffee,
+    "Coffee Machine": Coffee,
+    "Dishwasher": UtensilsCrossed,
+    
+    // Laundry
+    "Washing Machine": WashingMachine,
+    "Washer": WashingMachine,
+    "Dryer": Shirt,
+    "Iron": Iron,
+    "Ironing Board": Iron,
+    
+    // Climate Control
+    "Air Conditioning": AirVent,
+    "AC": AirVent,
+    "Heating": Flame,
+    "Heat": Flame,
+    "Fan": Wind,
+    
+    // Parking & Transportation
+    "Parking": Car,
+    "Free Parking": Car,
+    "Garage": Car,
+    "Street Parking": Car,
+    
+    // Outdoor & Recreation
+    "Pool": Pool,
+    "Swimming Pool": Pool,
+    "Hot Tub": Waves,
+    "Jacuzzi": Waves,
+    "Garden": Trees,
+    "Balcony": Mountain,
+    "Patio": Mountain,
+    "Terrace": Mountain,
     "Beach Access": Waves,
     "Mountain View": Mountain,
+    "Ocean View": Waves,
+    "City View": Mountain,
+    "Gym": Dumbbell,
+    "Fitness Center": Dumbbell,
+    "Bike": Bike,
+    "Bicycle": Bike,
+    
+    // Safety & Security
+    "Security": Shield,
+    "Safe": Shield,
+    "Fire Extinguisher": FireExtinguisher,
+    "Smoke Detector": Shield,
+    "Carbon Monoxide Detector": Shield,
+    
+    // Accessibility & Family
+    "Baby Friendly": Baby,
+    "High Chair": Baby,
+    "Crib": Baby,
+    "Pet Friendly": Dog,
+    "Pets Allowed": Dog,
+    
+    // Smoking
+    "Smoking Allowed": Cigarette,
+    "No Smoking": CigaretteOff,
+    
+    // Personal Care
+    "Hair Dryer": Hair,
+    "Shampoo": Hair,
+    "Towels": Shirt,
+    "Linens": Shirt,
+    
+    // Furniture & Comfort
+    "Sofa": Sofa,
+    "Couch": Sofa,
+    "Workspace": Desk,
+    "Desk": Desk,
+    "Chair": Sofa,
+    
+    // Entertainment
+    "Books": BookOpen,
+    "Games": Gamepad2,
+    "Music System": Music,
+    "Sound System": Music,
+    
+    // Default fallback icons
+    "Essentials": Shield,
+    "Hangers": Shirt,
+    "Toilet Paper": Shield,
+    "Bed Linens": Shirt,
+  };
+
+  // Function to get icon for amenity with fallback
+  const getAmenityIcon = (amenity: string) => {
+    // Try exact match first
+    if (amenityIcons[amenity]) {
+      return amenityIcons[amenity];
+    }
+    
+    // Try partial matches
+    const amenityLower = amenity.toLowerCase();
+    for (const [key, icon] of Object.entries(amenityIcons)) {
+      const keyLower = key.toLowerCase();
+      if (amenityLower.includes(keyLower) || keyLower.includes(amenityLower)) {
+        return icon;
+      }
+    }
+    
+    // Default fallback
+    return Shield;
   };
 
   const handleBooking = async () => {
@@ -239,13 +363,15 @@ const Listing = () => {
             {/* Amenities */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {listing.amenities?.map((amenity) => {
-                  const IconComponent = amenityIcons[amenity] || Wifi;
+                  const IconComponent = getAmenityIcon(amenity);
                   return (
-                    <div key={amenity} className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                      <IconComponent className="h-5 w-5 text-gray-600" />
-                      <span className="text-gray-700">{amenity}</span>
+                    <div key={amenity} className="flex items-center space-x-3 p-4 bg-white rounded-lg border border-gray-200 hover:border-rose-300 hover:shadow-sm transition-all duration-200">
+                      <div className="flex-shrink-0">
+                        <IconComponent className="h-5 w-5 text-rose-500" />
+                      </div>
+                      <span className="text-gray-700 font-medium">{amenity}</span>
                     </div>
                   );
                 })}
