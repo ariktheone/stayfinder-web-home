@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain, MapPin } from "lucide-react";
@@ -7,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import StripePayment from "@/components/StripePayment";
+import SecurePaymentForm from "@/components/SecurePaymentForm";
 import PaymentDeadlineCard from "@/components/PaymentDeadlineCard";
 import NearbyListings from "@/components/NearbyListings";
 import InteractiveListingMap from "@/components/InteractiveListingMap";
@@ -29,6 +29,7 @@ const Listing = () => {
   const [guests, setGuests] = useState(1);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [showSecurePayment, setShowSecurePayment] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [showPaymentDeadline, setShowPaymentDeadline] = useState(false);
 
@@ -115,8 +116,22 @@ const Listing = () => {
   };
 
   const handlePaymentClick = () => {
-    setShowPayment(true);
+    setShowSecurePayment(true);
     setShowPaymentDeadline(false);
+  };
+
+  const handleSecurePaymentSuccess = () => {
+    toast({
+      title: "Payment successful!",
+      description: "Your booking has been confirmed.",
+    });
+    setShowSecurePayment(false);
+    navigate('/bookings');
+  };
+
+  const handleSecurePaymentCancel = () => {
+    setShowSecurePayment(false);
+    setShowPaymentDeadline(true);
   };
 
   const handlePaymentSuccess = () => {
@@ -250,7 +265,16 @@ const Listing = () => {
 
           {/* Booking Card */}
           <div className="lg:col-span-1">
-            {showPaymentDeadline && bookingId ? (
+            {showSecurePayment && bookingId ? (
+              <div className="flex justify-center">
+                <SecurePaymentForm
+                  bookingId={bookingId}
+                  amount={totalAmount}
+                  onSuccess={handleSecurePaymentSuccess}
+                  onCancel={handleSecurePaymentCancel}
+                />
+              </div>
+            ) : showPaymentDeadline && bookingId ? (
               <PaymentDeadlineCard
                 bookingId={bookingId}
                 paymentDeadline={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()}
