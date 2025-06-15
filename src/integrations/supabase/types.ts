@@ -145,6 +145,228 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          booking_id: string | null
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          listing_id: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          listing_id?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          listing_id?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          host_since: string | null
+          id: string
+          is_host: boolean | null
+          is_verified: boolean | null
+          phone: string | null
+          response_rate: number | null
+          response_time: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          host_since?: string | null
+          id: string
+          is_host?: boolean | null
+          is_verified?: boolean | null
+          phone?: string | null
+          response_rate?: number | null
+          response_time?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          host_since?: string | null
+          id?: string
+          is_host?: boolean | null
+          is_verified?: boolean | null
+          phone?: string | null
+          response_rate?: number | null
+          response_time?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          accuracy_rating: number | null
+          booking_id: string | null
+          checkin_rating: number | null
+          cleanliness_rating: number | null
+          comment: string | null
+          communication_rating: number | null
+          created_at: string | null
+          id: string
+          listing_id: string
+          location_rating: number | null
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          value_rating: number | null
+        }
+        Insert: {
+          accuracy_rating?: number | null
+          booking_id?: string | null
+          checkin_rating?: number | null
+          cleanliness_rating?: number | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          id?: string
+          listing_id: string
+          location_rating?: number | null
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          value_rating?: number | null
+        }
+        Update: {
+          accuracy_rating?: number | null
+          booking_id?: string | null
+          checkin_rating?: number | null
+          cleanliness_rating?: number | null
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string | null
+          id?: string
+          listing_id?: string
+          location_rating?: number | null
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+          value_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string
+          wishlist_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id: string
+          wishlist_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string
+          wishlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_items_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_items_wishlist_id_fkey"
+            columns: ["wishlist_id"]
+            isOneToOne: false
+            referencedRelation: "wishlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlists: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -153,6 +375,30 @@ export type Database = {
       cancel_expired_bookings: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_listing_avg_rating: {
+        Args: { listing_uuid: string }
+        Returns: {
+          avg_rating: number
+          review_count: number
+        }[]
+      }
+      get_listing_reviews: {
+        Args: { listing_uuid: string }
+        Returns: {
+          review_id: string
+          reviewer_name: string
+          reviewer_avatar: string
+          rating: number
+          comment: string
+          cleanliness_rating: number
+          communication_rating: number
+          checkin_rating: number
+          accuracy_rating: number
+          location_rating: number
+          value_rating: number
+          created_at: string
+        }[]
       }
       get_listing_with_nearby: {
         Args: { listing_id: string; radius_km?: number }

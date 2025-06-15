@@ -1,198 +1,215 @@
 
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Home, User, Menu, X, Heart, MessageCircle, Calendar, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Menu, User, Home, Calendar, Settings, LogOut, PlusCircle } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out.",
-      });
-      
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: "Error",
-        description: "Failed to sign out.",
-        variant: "destructive",
-      });
+    await signOut();
+    navigate('/');
+  };
+
+  const handleAuthAction = () => {
+    if (user) {
+      handleSignOut();
+    } else {
+      navigate('/auth');
     }
   };
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
-              <Home className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">StayFinder</span>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <Home className="h-8 w-8 text-rose-500" />
+            <span className="text-xl font-bold text-gray-900">StayBook</span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => navigate('/')}
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link to="/" className="text-gray-700 hover:text-rose-600 transition-colors">
               Explore
-            </button>
-            {profile?.is_host && (
-              <button
-                onClick={() => navigate('/host')}
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center space-x-1"
-              >
-                <PlusCircle className="h-4 w-4" />
-                <span>Host Dashboard</span>
-              </button>
-            )}
+            </Link>
             {user && (
-              <button
-                onClick={() => navigate('/bookings')}
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center space-x-1"
-              >
-                <Calendar className="h-4 w-4" />
-                <span>My Bookings</span>
-              </button>
+              <>
+                <Link to="/wishlist" className="flex items-center space-x-1 text-gray-700 hover:text-rose-600 transition-colors">
+                  <Heart className="h-4 w-4" />
+                  <span>Wishlist</span>
+                </Link>
+                <Link to="/bookings" className="flex items-center space-x-1 text-gray-700 hover:text-rose-600 transition-colors">
+                  <Calendar className="h-4 w-4" />
+                  <span>Trips</span>
+                </Link>
+                <Link to="/messages" className="flex items-center space-x-1 text-gray-700 hover:text-rose-600 transition-colors">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Messages</span>
+                </Link>
+                {profile?.is_host && (
+                  <Link to="/host" className="text-gray-700 hover:text-rose-600 transition-colors">
+                    Host
+                  </Link>
+                )}
+              </>
             )}
           </nav>
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            {!user ? (
-              <div className="hidden md:flex items-center space-x-2">
-                <Button variant="ghost" onClick={() => navigate('/auth')}>
-                  Log in
-                </Button>
-                <Button 
-                  onClick={() => navigate('/auth')}
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
-                >
-                  Sign up
-                </Button>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center space-x-3">
-                {profile?.is_host && (
-                  <Badge variant="secondary">Host</Badge>
-                )}
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => navigate('/profile')}
-                    className="flex items-center space-x-2"
-                  >
-                    <User className="h-4 w-4" />
-                    <span>{profile?.full_name || user.email?.split('@')[0]}</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSignOut}
-                    className="text-gray-600 hover:text-red-600"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+            {!user && (
+              <Button
+                onClick={() => signInWithGoogle()}
+                variant="outline"
+                className="hidden md:flex"
+              >
+                Sign in with Google
+              </Button>
             )}
-
-            {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="md:hidden">
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center space-x-2 p-2">
                   <Menu className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <div className="flex flex-col space-y-4 mt-8">
-                  <button
-                    onClick={() => navigate('/')}
-                    className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left"
-                  >
-                    Explore
-                  </button>
-                  
                   {user ? (
-                    <>
-                      <button
-                        onClick={() => navigate('/bookings')}
-                        className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
-                      >
-                        <Calendar className="h-5 w-5" />
-                        <span>My Bookings</span>
-                      </button>
-                      
-                      {profile?.is_host && (
-                        <button
-                          onClick={() => navigate('/host')}
-                          className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
-                        >
-                          <PlusCircle className="h-5 w-5" />
-                          <span>Host Dashboard</span>
-                        </button>
-                      )}
-                      
-                      <button
-                        onClick={() => navigate('/profile')}
-                        className="text-lg font-medium text-gray-700 hover:text-blue-600 text-left flex items-center space-x-2"
-                      >
-                        <Settings className="h-5 w-5" />
-                        <span>Profile Settings</span>
-                      </button>
-                      
-                      <div className="border-t pt-4">
-                        <Button
-                          onClick={handleSignOut}
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <LogOut className="h-4 w-4 mr-2" />
-                          Sign Out
-                        </Button>
-                      </div>
-                    </>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={profile?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {profile?.full_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                   ) : (
-                    <div className="border-t pt-4 space-y-2">
-                      <Button 
-                        onClick={() => navigate('/auth')}
-                        className="w-full" 
-                        variant="outline"
-                      >
-                        Log in
-                      </Button>
-                      <Button 
-                        onClick={() => navigate('/auth')}
-                        className="w-full bg-gradient-to-r from-pink-500 to-rose-500"
-                      >
-                        Sign up
-                      </Button>
-                    </div>
+                    <User className="h-4 w-4" />
                   )}
-                </div>
-              </SheetContent>
-            </Sheet>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {user ? (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/wishlist')}>
+                      <Heart className="mr-2 h-4 w-4" />
+                      Wishlist
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bookings')}>
+                      <Calendar className="mr-2 h-4 w-4" />
+                      My Trips
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/messages')}>
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Messages
+                    </DropdownMenuItem>
+                    {profile?.is_host && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => navigate('/host')}>
+                          <Home className="mr-2 h-4 w-4" />
+                          Host Dashboard
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sign out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate('/auth')}>
+                      Sign in
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => signInWithGoogle()}>
+                      Sign in with Google
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/auth')}>
+                      Sign up
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            <nav className="flex flex-col space-y-3">
+              <Link 
+                to="/" 
+                className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Search className="h-4 w-4" />
+                <span>Explore</span>
+              </Link>
+              {user && (
+                <>
+                  <Link 
+                    to="/wishlist" 
+                    className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Heart className="h-4 w-4" />
+                    <span>Wishlist</span>
+                  </Link>
+                  <Link 
+                    to="/bookings" 
+                    className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>My Trips</span>
+                  </Link>
+                  <Link 
+                    to="/messages" 
+                    className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Messages</span>
+                  </Link>
+                  {profile?.is_host && (
+                    <Link 
+                      to="/host" 
+                      className="flex items-center space-x-2 px-2 py-1 text-gray-700 hover:text-rose-600"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Home className="h-4 w-4" />
+                      <span>Host Dashboard</span>
+                    </Link>
+                  )}
+                </>
+              )}
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );
