@@ -87,19 +87,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google'
+      console.log('Attempting Google sign-in...');
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        }
       });
       
       if (error) {
+        console.error('Google OAuth error:', error);
         // Handle the specific case where Google provider is not enabled
         if (error.message.includes('provider is not enabled')) {
-          console.error('Google provider is not enabled in Supabase settings');
-          throw new Error('Google sign-in is not configured. Please use email/password authentication or contact support.');
+          throw new Error('Google sign-in is not configured properly. Please check your Supabase settings.');
         }
-        console.error('Error signing in with Google:', error);
+        // Handle redirect URL mismatch
+        if (error.message.includes('redirect') || error.message.includes('callback')) {
+          throw new Error('Google OAuth redirect URL mismatch. Please check your Google Cloud Console settings.');
+        }
         throw error;
       }
+      
+      console.log('Google OAuth initiated successfully:', data);
     } catch (error) {
       console.error('Google sign in failed:', error);
       throw error;
