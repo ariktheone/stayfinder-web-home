@@ -10,10 +10,10 @@ import PropertyCard from "@/components/PropertyCard";
 import { Heart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Type for the Supabase query response
+// Type for the Supabase query response - listings comes as an array from the relationship
 interface WishlistItemWithListing {
   id: string;
-  listings: Listing | null;
+  listings: Listing[];
 }
 
 const Wishlist = () => {
@@ -73,10 +73,10 @@ const Wishlist = () => {
 
         if (error) throw error;
 
-        // Extract listings from the nested structure
+        // Extract listings from the nested structure - listings is an array, so take the first item
         const listings: Listing[] = (data as WishlistItemWithListing[])
-          ?.map(item => item.listings)
-          .filter((listing): listing is Listing => listing !== null) || [];
+          ?.map(item => item.listings[0]) // Take first listing from array
+          .filter((listing): listing is Listing => listing !== null && listing !== undefined) || [];
         
         setWishlistItems(listings);
       }
