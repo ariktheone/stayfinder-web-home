@@ -43,15 +43,36 @@ const Wishlist = () => {
           .from('wishlist_items')
           .select(`
             id,
-            listings (*)
+            listings (
+              id,
+              host_id,
+              title,
+              description,
+              location,
+              latitude,
+              longitude,
+              price_per_night,
+              max_guests,
+              bedrooms,
+              bathrooms,
+              amenities,
+              images,
+              type,
+              created_at,
+              updated_at
+            )
           `)
           .eq('wishlist_id', wishlist.id)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        const listings = data?.map(item => item.listings).filter(Boolean) || [];
-        setWishlistItems(listings as Listing[]);
+        // Extract listings from the nested structure
+        const listings = data
+          ?.map(item => item.listings)
+          .filter((listing): listing is Listing => listing !== null) || [];
+        
+        setWishlistItems(listings);
       }
     } catch (error) {
       console.error('Error fetching wishlist:', error);
