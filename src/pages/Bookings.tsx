@@ -1,14 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle, CreditCard, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import StripePaymentForm from "@/components/StripePaymentForm";
 
 interface BookingWithListing {
   id: string;
@@ -33,6 +35,8 @@ const Bookings = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<BookingWithListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<BookingWithListing | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -98,6 +102,15 @@ const Bookings = () => {
     }
   };
 
+  const handlePaymentSuccess = () => {
+    setShowPayment(false);
+    toast({
+      title: "Payment Successful!",
+      description: "Your booking has been confirmed.",
+    });
+    fetchBookings();
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -122,6 +135,13 @@ const Bookings = () => {
       default:
         return 'bg-yellow-100 text-yellow-800';
     }
+  };
+
+  const getDaysBetween = (checkIn: string, checkOut: string) => {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
   if (loading) {
@@ -204,21 +224,114 @@ const Bookings = () => {
                         ${Math.round((booking.total_amount || 0) / 100)}
                       </p>
                       <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/listing/${booking.listing.id}`)}
-                        >
-                          View Listing
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedBooking(booking)}
+                            >
+                              <Eye className="mr-1 h-4 w-4" />
+                              Details
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Booking Details</DialogTitle>
+                            </DialogHeader>
+                            {selectedBooking && (
+                              <div className="space-y-6">
+                                <div className="flex items-start space-x-4">
+                                  <img
+                                    src={selectedBooking.listing.images?.[0] || '/placeholder.svg'}
+                                    alt={selectedBooking.listing.title}
+                                    className="w-32 h-32 object-cover rounded-lg"
+                                  />
+                                  <div className="flex-1">
+                                    <h3 className="text-xl font-semibold mb-2">{selectedBooking.listing.title}</h3>
+                                    <div className="flex items-center text-gray-600 mb-2">
+                                      <MapPin className="h-4 w-4 mr-1" />
+                                      <span>{selectedBooking.listing.location}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      {getStatusIcon(selectedBooking.status)}
+                                      <Badge className={getStatusColor(selectedBooking.status)}>
+                                        {selectedBooking.status.charAt(0).toUpperCase() + selectedBooking.status.slice(1)}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Check-in</h4>
+                                    <p className="text-gray-600">{new Date(selectedBooking.check_in).toLocaleDateString()}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Check-out</h4>
+                                    <p className="text-gray-600">{new Date(selectedBooking.check_out).toLocaleDateString()}</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Guests</h4>
+                                    <p className="text-gray-600">{selectedBooking.total_guests} guests</p>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Duration</h4>
+                                    <p className="text-gray-600">{getDaysBetween(selectedBooking.check_in, selectedBooking.check_out)} nights</p>
+                                  </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                  <h4 className="font-semibold mb-2">Price Breakdown</h4>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between">
+                                      <span>${selectedBooking.listing.price_per_night / 100} × {getDaysBetween(selectedBooking.check_in, selectedBooking.check_out)} nights</span>
+                                      <span>${(selectedBooking.listing.price_per_night * getDaysBetween(selectedBooking.check_in, selectedBooking.check_out)) / 100}</span>
+                                    </div>
+                                    <div className="flex justify-between font-semibold text-lg border-t pt-2">
+                                      <span>Total</span>
+                                      <span>${Math.round((selectedBooking.total_amount || 0) / 100)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="text-sm text-gray-500">
+                                  <p>Booking ID: {selectedBooking.id}</p>
+                                  <p>Booked on: {new Date(selectedBooking.created_at).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+
                         {booking.status === 'pending' && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => cancelBooking(booking.id)}
-                          >
-                            Cancel
-                          </Button>
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setSelectedBooking(booking);
+                                setShowPayment(true);
+                              }}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CreditCard className="mr-1 h-4 w-4" />
+                              Pay Now
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => cancelBooking(booking.id)}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+
+                        {booking.status === 'confirmed' && (
+                          <div className="flex items-center text-green-600 text-sm">
+                            <CheckCircle className="mr-1 h-4 w-4" />
+                            Paid
+                          </div>
                         )}
                       </div>
                     </div>
@@ -228,6 +341,22 @@ const Bookings = () => {
             ))}
           </div>
         )}
+
+        {/* Payment Dialog */}
+        <Dialog open={showPayment} onOpenChange={setShowPayment}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Complete Payment</DialogTitle>
+            </DialogHeader>
+            {selectedBooking && (
+              <StripePaymentForm
+                bookingId={selectedBooking.id}
+                amount={selectedBooking.total_amount}
+                onSuccess={handlePaymentSuccess}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
