@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Search, MapPin, Users, Calendar, Filter, SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -113,201 +112,231 @@ const EnhancedSearchFilters = ({
 
   if (compact) {
     return (
-      <div className="flex flex-wrap items-center gap-3 p-4 bg-white rounded-xl shadow-sm border">
-        {/* Location Search */}
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Where to?"
-              value={filters.location}
-              onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-              className="pl-10 h-11 border-gray-200 focus:border-rose-300"
-            />
-          </div>
-        </div>
-
-        {/* Guests */}
-        <div className="w-24">
-          <div className="relative">
-            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="number"
-              min="1"
-              value={filters.guests}
-              onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-              className="pl-10 h-11 border-gray-200 focus:border-rose-300"
-            />
-          </div>
-        </div>
-
-        {/* Advanced Filters */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="h-11 relative border-gray-200">
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-              {hasActiveFilters() && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {[
-                    filters.location,
-                    checkInDate,
-                    checkOutDate,
-                    filters.guests > 1,
-                    filters.minPrice > 0,
-                    filters.maxPrice < 1000,
-                    filters.propertyType,
-                    filters.amenities?.length,
-                    filters.instantBook
-                  ].filter(Boolean).length}
-                </span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80 p-6" align="end">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900">Filters</h3>
-                {hasActiveFilters() && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500">
-                    Clear all
-                  </Button>
-                )}
-              </div>
-
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Check-in</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal mt-1">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {checkInDate ? format(checkInDate, "MMM dd") : "Date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={checkInDate}
-                        onSelect={setCheckInDate}
-                        disabled={(date) => date < new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Check-out</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal mt-1">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {checkOutDate ? format(checkOutDate, "MMM dd") : "Date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={checkOutDate}
-                        onSelect={setCheckOutDate}
-                        disabled={(date) => date < (checkInDate || new Date())}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Price Range (per night)</Label>
-                <div className="mt-3">
-                  <Slider
-                    value={[filters.minPrice, filters.maxPrice]}
-                    onValueChange={([min, max]) => setFilters(prev => ({ 
-                      ...prev, 
-                      minPrice: min, 
-                      maxPrice: max 
-                    }))}
-                    max={1000}
-                    step={10}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-600 mt-2">
-                    <span>${filters.minPrice}</span>
-                    <span>${filters.maxPrice}+</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Property Type */}
-              <div>
-                <Label className="text-sm font-medium text-gray-700">Property Type</Label>
-                <Select
-                  value={filters.propertyType || "all"}
-                  onValueChange={(value) => setFilters(prev => ({ 
-                    ...prev, 
-                    propertyType: value === "all" ? "" : value 
-                  }))}
-                >
-                  <SelectTrigger className="w-full mt-1">
-                    <SelectValue placeholder="Any type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Any type</SelectItem>
-                    {propertyTypes.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button onClick={handleSearch} className="w-full bg-rose-500 hover:bg-rose-600 text-white">
-                <Search className="mr-2 h-4 w-4" />
-                Apply Filters
-              </Button>
+      <div className="w-full mobile-optimized">
+        {/* Mobile-first compact layout */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl shadow-sm border touch-manipulation">
+          {/* Location Search - Full width on mobile */}
+          <div className="flex-1 min-w-0 w-full sm:min-w-[200px]">
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+              <Input
+                placeholder="Where to?"
+                value={filters.location}
+                onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                className="pl-10 h-12 sm:h-11 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
+              />
             </div>
-          </PopoverContent>
-        </Popover>
+          </div>
 
-        {/* Search Button */}
-        <Button 
-          onClick={handleSearch} 
-          disabled={loading}
-          className="bg-rose-500 hover:bg-rose-600 text-white h-11 px-6"
-        >
-          <Search className="mr-2 h-4 w-4" />
-          {loading ? 'Searching...' : 'Search'}
-        </Button>
+          {/* Mobile row for guests and filters */}
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            {/* Guests - Smaller on mobile */}
+            <div className="w-20 sm:w-24">
+              <div className="relative">
+                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                <Input
+                  type="number"
+                  min="1"
+                  value={filters.guests}
+                  onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
+                  className="pl-10 h-12 sm:h-11 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
+                />
+              </div>
+            </div>
+
+            {/* Advanced Filters - Responsive popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="h-12 sm:h-11 relative border-gray-200 touch-target flex-shrink-0 px-3 sm:px-4"
+                >
+                  <Filter className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Filters</span>
+                  {hasActiveFilters() && (
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {[
+                        filters.location,
+                        checkInDate,
+                        checkOutDate,
+                        filters.guests > 1,
+                        filters.minPrice > 0,
+                        filters.maxPrice < 1000,
+                        filters.propertyType,
+                        filters.amenities?.length,
+                        filters.instantBook
+                      ].filter(Boolean).length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent 
+                className="w-screen sm:w-96 p-4 sm:p-6 mx-4 sm:mx-0 max-h-[80vh] overflow-y-auto mobile-optimized" 
+                align="end"
+                side="bottom"
+                sideOffset={8}
+              >
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900 text-lg">Filters</h3>
+                    {hasActiveFilters() && (
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500 touch-target">
+                        Clear all
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Dates - Mobile optimized */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Check-in</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start text-left font-normal touch-target h-12"
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {checkInDate ? format(checkInDate, "MMM dd") : "Date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={checkInDate}
+                            onSelect={setCheckInDate}
+                            disabled={(date) => date < new Date()}
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">Check-out</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            className="w-full justify-start text-left font-normal touch-target h-12"
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {checkOutDate ? format(checkOutDate, "MMM dd") : "Date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={checkOutDate}
+                            onSelect={setCheckOutDate}
+                            disabled={(date) => date < (checkInDate || new Date())}
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+
+                  {/* Price Range - Mobile optimized */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-3 block">Price Range (per night)</Label>
+                    <div className="px-2">
+                      <Slider
+                        value={[filters.minPrice, filters.maxPrice]}
+                        onValueChange={([min, max]) => setFilters(prev => ({ 
+                          ...prev, 
+                          minPrice: min, 
+                          maxPrice: max 
+                        }))}
+                        max={1000}
+                        step={10}
+                        className="w-full touch-manipulation"
+                      />
+                      <div className="flex justify-between text-sm text-gray-600 mt-3">
+                        <span>${filters.minPrice}</span>
+                        <span>${filters.maxPrice}+</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Property Type - Mobile optimized */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Property Type</Label>
+                    <Select
+                      value={filters.propertyType || "all"}
+                      onValueChange={(value) => setFilters(prev => ({ 
+                        ...prev, 
+                        propertyType: value === "all" ? "" : value 
+                      }))}
+                    >
+                      <SelectTrigger className="w-full h-12 touch-target">
+                        <SelectValue placeholder="Any type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Any type</SelectItem>
+                        {propertyTypes.map(type => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Apply Button */}
+                  <Button 
+                    onClick={handleSearch} 
+                    className="w-full bg-rose-500 hover:bg-rose-600 text-white h-12 touch-target"
+                  >
+                    <Search className="mr-2 h-4 w-4" />
+                    Apply Filters
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Search Button */}
+            <Button 
+              onClick={handleSearch} 
+              disabled={loading}
+              className="bg-rose-500 hover:bg-rose-600 text-white h-12 sm:h-11 px-4 sm:px-6 touch-target flex-shrink-0"
+            >
+              <Search className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">{loading ? 'Searching...' : 'Search'}</span>
+              <span className="sm:hidden">{loading ? '...' : 'Go'}</span>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border p-6">
-      {/* Main Search Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="bg-white rounded-2xl shadow-lg border p-4 sm:p-6 mobile-optimized">
+      {/* Main Search Row - Mobile responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Location */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Where</Label>
           <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
             <Input
               placeholder="Search destinations"
               value={filters.location}
               onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-              className="pl-10 h-12 border-gray-200 focus:border-rose-300"
+              className="pl-10 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
             />
           </div>
         </div>
 
-        {/* Check-in */}
+        {/* Check-in - Mobile optimized */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Check-in</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal h-12 border-gray-200">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-left font-normal h-12 border-gray-200 touch-target"
+              >
                 <Calendar className="mr-2 h-4 w-4" />
                 {checkInDate ? format(checkInDate, "MMM dd") : "Add dates"}
               </Button>
@@ -318,17 +347,21 @@ const EnhancedSearchFilters = ({
                 selected={checkInDate}
                 onSelect={setCheckInDate}
                 disabled={(date) => date < new Date()}
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* Check-out */}
+        {/* Check-out - Mobile optimized */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Check-out</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal h-12 border-gray-200">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-left font-normal h-12 border-gray-200 touch-target"
+              >
                 <Calendar className="mr-2 h-4 w-4" />
                 {checkOutDate ? format(checkOutDate, "MMM dd") : "Add dates"}
               </Button>
@@ -339,34 +372,35 @@ const EnhancedSearchFilters = ({
                 selected={checkOutDate}
                 onSelect={setCheckOutDate}
                 disabled={(date) => date < (checkInDate || new Date())}
+                className="pointer-events-auto"
               />
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* Guests */}
+        {/* Guests - Mobile optimized */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">Guests</Label>
           <div className="relative">
-            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
             <Input
               type="number"
               min="1"
               value={filters.guests}
               onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-              className="pl-10 h-12 border-gray-200 focus:border-rose-300"
+              className="pl-10 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
             />
           </div>
         </div>
       </div>
 
-      {/* Action Row */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-4">
+      {/* Action Row - Mobile responsive */}
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <Button
             variant="outline"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center space-x-2"
+            className="flex items-center justify-center space-x-2 h-12 sm:h-auto touch-target"
           >
             <SlidersHorizontal className="h-4 w-4" />
             <span>More filters</span>
@@ -388,22 +422,22 @@ const EnhancedSearchFilters = ({
           </Button>
           
           {hasActiveFilters() && (
-            <Button variant="ghost" onClick={clearFilters} className="text-gray-500">
+            <Button variant="ghost" onClick={clearFilters} className="text-gray-500 h-12 sm:h-auto touch-target">
               Clear all
             </Button>
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="flex items-center space-x-2">
-            <Label htmlFor="sortBy" className="text-sm">Sort by:</Label>
+            <Label htmlFor="sortBy" className="text-sm whitespace-nowrap">Sort by:</Label>
             <Select
               value={filters.sortBy}
               onValueChange={(value: 'price_low' | 'price_high' | 'rating' | 'distance') => 
                 setFilters(prev => ({ ...prev, sortBy: value }))
               }
             >
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40 h-12 sm:h-auto touch-target">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -418,7 +452,7 @@ const EnhancedSearchFilters = ({
           <Button 
             onClick={handleSearch} 
             disabled={loading}
-            className="bg-rose-500 hover:bg-rose-600 text-white px-8 h-12"
+            className="bg-rose-500 hover:bg-rose-600 text-white px-6 sm:px-8 h-12 touch-target"
           >
             <Search className="mr-2 h-4 w-4" />
             {loading ? 'Searching...' : 'Search'}
@@ -426,13 +460,13 @@ const EnhancedSearchFilters = ({
         </div>
       </div>
 
-      {/* Advanced Filters */}
+      {/* Advanced Filters - Mobile responsive */}
       {showAdvanced && (
-        <div className="mt-6 p-6 bg-gray-50 rounded-xl border-t space-y-6">
+        <div className="mt-6 p-4 sm:p-6 bg-gray-50 rounded-xl border-t space-y-6">
           {/* Price Range */}
           <div>
-            <Label className="text-base font-semibold">Price Range (per night)</Label>
-            <div className="mt-3">
+            <Label className="text-base font-semibold mb-3 block">Price Range (per night)</Label>
+            <div className="px-2">
               <Slider
                 value={[filters.minPrice, filters.maxPrice]}
                 onValueChange={([min, max]) => setFilters(prev => ({ 
@@ -442,9 +476,9 @@ const EnhancedSearchFilters = ({
                 }))}
                 max={1000}
                 step={10}
-                className="w-full"
+                className="w-full touch-manipulation"
               />
-              <div className="flex justify-between text-sm text-gray-600 mt-2">
+              <div className="flex justify-between text-sm text-gray-600 mt-3">
                 <span>${filters.minPrice}</span>
                 <span>${filters.maxPrice}+</span>
               </div>
@@ -453,7 +487,7 @@ const EnhancedSearchFilters = ({
 
           {/* Property Type */}
           <div>
-            <Label className="text-base font-semibold">Property Type</Label>
+            <Label className="text-base font-semibold mb-2 block">Property Type</Label>
             <Select
               value={filters.propertyType || "all"}
               onValueChange={(value) => setFilters(prev => ({ 
@@ -461,7 +495,7 @@ const EnhancedSearchFilters = ({
                 propertyType: value === "all" ? "" : value 
               }))}
             >
-              <SelectTrigger className="w-full mt-2">
+              <SelectTrigger className="w-full h-12 touch-target">
                 <SelectValue placeholder="Any type" />
               </SelectTrigger>
               <SelectContent>
@@ -477,16 +511,17 @@ const EnhancedSearchFilters = ({
 
           {/* Amenities */}
           <div>
-            <Label className="text-base font-semibold">Amenities</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+            <Label className="text-base font-semibold mb-3 block">Amenities</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {amenityOptions.map(amenity => (
-                <div key={amenity} className="flex items-center space-x-2">
+                <div key={amenity} className="flex items-center space-x-2 touch-target">
                   <Checkbox
                     id={amenity}
                     checked={filters.amenities?.includes(amenity)}
                     onCheckedChange={() => toggleAmenity(amenity)}
+                    className="touch-target"
                   />
-                  <Label htmlFor={amenity} className="text-sm">
+                  <Label htmlFor={amenity} className="text-sm cursor-pointer">
                     {amenity}
                   </Label>
                 </div>
@@ -495,7 +530,7 @@ const EnhancedSearchFilters = ({
           </div>
 
           {/* Instant Book */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 touch-target">
             <Checkbox
               id="instantBook"
               checked={filters.instantBook}
@@ -503,8 +538,9 @@ const EnhancedSearchFilters = ({
                 ...prev, 
                 instantBook: !!checked 
               }))}
+              className="touch-target"
             />
-            <Label htmlFor="instantBook" className="font-medium">Instant Book</Label>
+            <Label htmlFor="instantBook" className="font-medium cursor-pointer">Instant Book</Label>
             <span className="text-sm text-gray-500">Properties you can book without waiting for host approval</span>
           </div>
         </div>
