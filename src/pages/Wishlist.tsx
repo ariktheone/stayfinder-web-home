@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -67,7 +68,7 @@ const Wishlist = () => {
         if (error) throw error;
 
         // Extract listings from the nested structure
-        const listings = data
+        const listings: Listing[] = data
           ?.map(item => item.listings)
           .filter((listing): listing is Listing => listing !== null) || [];
         
