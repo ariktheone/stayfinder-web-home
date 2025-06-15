@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Listing, SearchFilters } from "@/types/database";
 import { useListings } from "@/hooks/useListings";
@@ -55,6 +56,7 @@ const Index = () => {
   };
 
   const handleDestinationClick = async (location: string) => {
+    console.log('Destination clicked:', location);
     const destinationFilters: SearchFilters = {
       location: location,
       checkIn: '',
@@ -68,7 +70,15 @@ const Index = () => {
       sortBy: 'price_low'
     };
     
-    await handleSearch(destinationFilters);
+    // Set the search state immediately
+    setHasSearched(true);
+    setCurrentFilters(destinationFilters);
+    
+    try {
+      await fetchListings(destinationFilters);
+    } catch (error) {
+      console.error('Destination search error:', error);
+    }
   };
 
   // Apply sorting when listings change after search

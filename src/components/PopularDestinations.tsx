@@ -54,6 +54,7 @@ const PopularDestinations = ({ onDestinationClick }: PopularDestinationsProps) =
   ];
 
   const handleDestinationClick = (destinationName: string) => {
+    console.log('Popular destination clicked:', destinationName);
     if (onDestinationClick) {
       onDestinationClick(destinationName);
     }
@@ -86,7 +87,7 @@ const PopularDestinations = ({ onDestinationClick }: PopularDestinationsProps) =
                   handleDestinationClick(destination.name);
                 }
               }}
-              aria-label={`Explore stays in ${destination.name} - ${destination.description}`}
+              aria-label={`Search stays in ${destination.name} - ${destination.description}`}
             >
               <div className="aspect-[4/5] bg-gradient-to-br from-gray-200 to-gray-300 relative overflow-hidden">
                 <img
@@ -172,8 +173,8 @@ const PopularDestinations = ({ onDestinationClick }: PopularDestinationsProps) =
         
         {/* Call to action */}
         <div className="text-center mt-10 sm:mt-12 md:mt-16">
-          <p className="text-sm sm:text-base text-gray-600 mobile-text">
-            Click on any destination to start exploring amazing stays
+          <p className="text-sm sm:text-base text-gray-600 mobile-text bg-blue-50/50 backdrop-blur-sm rounded-full px-4 py-2 inline-block">
+            💡 Click on any destination to explore amazing stays in that city
           </p>
         </div>
       </div>
