@@ -95,14 +95,34 @@
     @apply bg-background text-foreground;
   }
 
-  /* Ensure proper mobile scrolling */
+  /* Mobile optimization for iOS and Android */
   html {
     -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Prevent horizontal scrolling on mobile */
+  /* Prevent horizontal scrolling and improve touch behavior */
   body {
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+
+  /* Safe area support for modern devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
   }
 }
 
@@ -147,6 +167,20 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+
+  /* Enhanced touch targets for mobile */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Prevent text selection on touch elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 }
 
 @keyframes fadeIn {
@@ -171,8 +205,71 @@
   }
 }
 
-/* Mobile-specific responsive improvements */
-@media (max-width: 640px) {
+/* iPhone specific optimizations */
+@media screen and (max-width: 414px) and (-webkit-min-device-pixel-ratio: 2) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Optimize for iPhone notch and home indicator */
+  .hero-section {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Better button sizing for iPhone */
+  button, 
+  [role="button"], 
+  input[type="submit"], 
+  input[type="button"] {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 16px;
+  }
+
+  /* Prevent zoom on form inputs */
+  input, 
+  textarea, 
+  select {
+    font-size: 16px;
+    transform: scale(1);
+  }
+
+  /* Optimize grid layouts for iPhone */
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+/* Samsung Galaxy S8+ and similar Android devices */
+@media screen and (max-width: 414px) and (min-height: 800px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Optimize for taller screens */
+  .hero-content {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  /* Better spacing for tall screens */
+  .section-spacing {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* General mobile improvements (320px to 768px) */
+@media (max-width: 767px) {
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -183,22 +280,111 @@
   [role="button"], 
   input[type="submit"], 
   input[type="button"] {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 16px;
+    border-radius: 8px;
   }
 
   /* Better mobile form inputs */
   input, 
   textarea, 
   select {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  /* Optimize property card grid */
+  .property-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Better mobile navigation */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    padding: env(safe-area-inset-bottom) 0 0;
+    z-index: 50;
+  }
+
+  /* Improve text readability */
+  .mobile-text {
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  .mobile-title {
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .mobile-subtitle {
+    font-size: 18px;
+    line-height: 1.4;
   }
 }
 
-/* Tablet improvements */
-@media (min-width: 641px) and (max-width: 1024px) {
+/* Small mobile devices (iPhone SE, older Android) */
+@media (max-width: 375px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Adjust font sizes for small screens */
+  .mobile-title {
+    font-size: 20px;
+  }
+
+  .mobile-subtitle {
+    font-size: 16px;
+  }
+
+  /* Optimize grid for very small screens */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Tablet improvements (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
   .container {
     padding-left: 2rem;
     padding-right: 2rem;
+  }
+
+  .property-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Large tablets and small desktops */
+@media (min-width: 1025px) {
+  .property-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
   }
 }

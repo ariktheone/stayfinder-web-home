@@ -100,7 +100,7 @@ const Index = () => {
   const displayListings = hasSearched ? filteredListings : (originalListings.length > 0 ? originalListings : listings);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 mobile-optimized safe-area-top safe-area-bottom">
       <Header />
       
       {!hasSearched ? (
@@ -110,21 +110,21 @@ const Index = () => {
           <PopularDestinations />
           
           {/* Featured Listings Section */}
-          <section className="py-12 sm:py-16 px-4 bg-white/30">
+          <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 bg-white/30 section-spacing">
             <div className="container mx-auto max-w-7xl">
-              <div className="text-center mb-8 sm:mb-12">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 px-4">
+              <div className="text-center mb-6 sm:mb-8 md:mb-12">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-4 mobile-title mobile-optimized">
                   Featured stays
                 </h2>
-                <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4">
+                <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-3 sm:px-4 mobile-text">
                   Handpicked accommodations for your perfect getaway
                 </p>
               </div>
 
               {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                <div className="property-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="animate-pulse">
+                    <div key={i} className="animate-pulse touch-manipulation">
                       <div className="h-48 sm:h-56 md:h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl sm:rounded-2xl mb-4"></div>
                       <div className="space-y-3 px-2">
                         <div className="h-4 bg-gray-300 rounded-full w-3/4"></div>
@@ -135,11 +135,11 @@ const Index = () => {
                   ))}
                 </div>
               ) : displayListings.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-2">
+                <div className="property-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-1 sm:px-2">
                   {displayListings.slice(0, 8).map((listing, index) => (
                     <div 
                       key={listing.id} 
-                      className="animate-fade-in"
+                      className="animate-fade-in touch-manipulation"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <PropertyCard listing={listing} />
@@ -147,14 +147,14 @@ const Index = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16 sm:py-20 px-4">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                    <svg className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center py-12 sm:py-16 md:py-20 px-3 sm:px-4">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No properties available</h3>
-                  <p className="text-sm sm:text-base text-gray-500">Start searching to discover amazing places to stay!</p>
+                  <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-700 mb-2 mobile-subtitle mobile-optimized">No properties available</h3>
+                  <p className="text-sm sm:text-base text-gray-500 mobile-text">Start searching to discover amazing places to stay!</p>
                 </div>
               )}
             </div>
