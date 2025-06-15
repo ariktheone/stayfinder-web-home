@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -5,7 +6,7 @@ import {
   AirVent, Coffee, Tv, Utensils, Shirt, Wind, Snowflake, 
   Flame, Shield, Baby, Dog, Cigarette, CigaretteOff, Dumbbell,
   Trees, Waves as Pool, UtensilsCrossed, Microwave, Refrigerator,
-  WashingMachine, Hair, Iron, Sofa, Desk, FireExtinguisher,
+  WashingMachine, Zap, ShirtIcon, Sofa, Monitor, FireExtinguisher,
   Camera, Music, BookOpen, Gamepad2, Bike, Car as ParkingIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,8 +73,8 @@ const Listing = () => {
     "Washing Machine": WashingMachine,
     "Washer": WashingMachine,
     "Dryer": Shirt,
-    "Iron": Iron,
-    "Ironing Board": Iron,
+    "Iron": Zap,
+    "Ironing Board": Zap,
     
     // Climate Control
     "Air Conditioning": AirVent,
@@ -125,16 +126,16 @@ const Listing = () => {
     "No Smoking": CigaretteOff,
     
     // Personal Care
-    "Hair Dryer": Hair,
-    "Shampoo": Hair,
+    "Hair Dryer": Zap,
+    "Shampoo": Zap,
     "Towels": Shirt,
     "Linens": Shirt,
     
     // Furniture & Comfort
     "Sofa": Sofa,
     "Couch": Sofa,
-    "Workspace": Desk,
-    "Desk": Desk,
+    "Workspace": Monitor,
+    "Desk": Monitor,
     "Chair": Sofa,
     
     // Entertainment
