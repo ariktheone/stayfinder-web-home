@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Star, Users, Bed, Bath, Wifi, Car, Waves, Mountain } from "lucide-react";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import StripePayment from "@/components/StripePayment";
+import PaymentDeadlineCard from "@/components/PaymentDeadlineCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Listing as ListingType } from "@/types/database";
