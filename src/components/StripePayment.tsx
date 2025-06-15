@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { CreditCard, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,8 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
     setLoading(true);
 
     try {
-      // Mock Stripe payment - in real app, you'd call your payment edge function
-      const { data, error } = await supabase.functions.invoke('create-payment-session', {
+      // Create payment intent
+      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
         body: {
           booking_id: bookingId,
           amount: amount,
@@ -29,59 +30,41 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
       });
 
       if (error) {
-        // Fallback to mock payment for demo
-        await mockPayment();
-        return;
+        throw new Error(error.message || 'Failed to create payment');
       }
 
-      // In real app, redirect to Stripe checkout
-      if (data?.url) {
-        window.open(data.url, '_blank');
+      // For demo purposes, we'll simulate a successful payment
+      // In a real app, you'd redirect to Stripe Checkout or use Stripe Elements
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulate payment confirmation
+      const confirmResult = await supabase.functions.invoke('confirm-payment', {
+        body: {
+          payment_intent_id: `pi_demo_${Date.now()}`,
+          booking_id: bookingId
+        }
+      });
+
+      if (confirmResult.error) {
+        throw new Error(confirmResult.error.message || 'Payment confirmation failed');
       }
+
+      toast({
+        title: "Payment Successful!",
+        description: "Your booking has been confirmed.",
+      });
+
+      onSuccess();
     } catch (error) {
       console.error('Payment error:', error);
-      // Demo: simulate successful payment
-      await mockPayment();
+      toast({
+        title: "Payment Error",
+        description: error.message || "There was an issue processing your payment.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  };
-
-  const mockPayment = async () => {
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const { error } = await supabase
-      .from("bookings")
-      .update({ status: "confirmed" })
-      .eq("id", bookingId);
-
-    if (error) {
-      console.error("Error updating booking:", error);
-      toast({
-        title: "Payment Error",
-        description: "There was an issue processing your payment.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    await supabase
-      .from("payments")
-      .insert({
-        booking_id: bookingId,
-        amount: amount,
-        currency: "usd",
-        status: "paid",
-        stripe_payment_intent_id: `pi_mock_${Date.now()}`
-      });
-
-    toast({
-      title: "Payment Successful!",
-      description: "Your booking has been confirmed.",
-    });
-
-    onSuccess();
   };
 
   return (
@@ -99,7 +82,7 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
             <span className="text-xl font-bold">${(amount / 100).toFixed(2)}</span>
           </div>
           <p className="text-sm text-gray-600">
-            This is a demo environment. No real payments will be processed.
+            Secure payment processing with Stripe
           </p>
         </div>
 
@@ -112,10 +95,10 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
           <div className="border-2 border-dashed border-gray-300 p-4 rounded-lg text-center">
             <CreditCard className="h-8 w-8 text-gray-400 mx-auto mb-2" />
             <p className="text-sm text-gray-600 mb-2">
-              Demo Mode: Mock Payment Processing
+              Demo Mode: Simulated Payment Processing
             </p>
             <p className="text-xs text-gray-500">
-              In production, this would integrate with Stripe's secure payment form
+              In production, this would use Stripe's secure payment form
             </p>
           </div>
         </div>
