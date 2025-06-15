@@ -91,11 +91,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `${window.location.origin}/`
         }
       });
       
       if (error) {
+        // Handle the specific case where Google provider is not enabled
+        if (error.message.includes('provider is not enabled')) {
+          console.error('Google provider is not enabled in Supabase settings');
+          throw new Error('Google sign-in is not configured. Please use email/password authentication or contact support.');
+        }
         console.error('Error signing in with Google:', error);
         throw error;
       }
@@ -107,12 +112,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      // Clear local state first
-      setUser(null);
-      setSession(null);
-      setProfile(null);
+      setLoading(true);
       
-      // Sign out from Supabase (this will also clear the session from storage)
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -120,10 +122,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
       
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      
       console.log('Successfully signed out');
     } catch (error) {
       console.error('Sign out failed:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

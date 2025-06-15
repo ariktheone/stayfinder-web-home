@@ -61,13 +61,7 @@ const AllListings = () => {
     });
     
     // Update the listings with sorted data
-    // Since we can't directly modify the hook's state, we'll trigger a refetch
     fetchListings(updatedFilters);
-  };
-
-  const handleSearch = async (filters: SearchFilters) => {
-    setCurrentFilters(filters);
-    await fetchListings(filters);
   };
 
   return (
@@ -105,8 +99,6 @@ const AllListings = () => {
         onClearFilters={handleClearFilters}
         currentFilters={currentFilters}
         onUpdateSort={handleUpdateSort}
-        onSearch={handleSearch}
-        showSearchBar={true}
       />
     </div>
   );

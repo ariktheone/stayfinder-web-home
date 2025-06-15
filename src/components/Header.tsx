@@ -38,11 +38,16 @@ const Header = () => {
     }
   };
 
-  const handleAuthAction = () => {
-    if (user) {
-      handleSignOut();
-    } else {
-      navigate('/auth');
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      toast({
+        title: "Sign in failed",
+        description: error.message || "There was an error signing you in. Please try email/password authentication.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -92,7 +97,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {!user && (
               <Button
-                onClick={() => signInWithGoogle()}
+                onClick={handleGoogleSignIn}
                 variant="outline"
                 className="hidden md:flex"
               >
@@ -158,7 +163,7 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/auth')}>
                       Sign in
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => signInWithGoogle()}>
+                    <DropdownMenuItem onClick={handleGoogleSignIn}>
                       Sign in with Google
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/auth')}>
