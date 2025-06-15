@@ -8,79 +8,52 @@ import { Badge } from "@/components/ui/badge";
 import SearchFilters from "@/components/SearchFilters";
 import PropertyCard from "@/components/PropertyCard";
 import Header from "@/components/Header";
-import Map from "@/components/Map";
-
-const properties = [
-  {
-    id: 1,
-    title: "Modern Loft in Downtown",
-    location: "New York, NY",
-    price: 150,
-    rating: 4.8,
-    reviews: 42,
-    image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=800&q=80",
-    host: "Sarah Johnson",
-    type: "Entire apartment",
-    guests: 4,
-    bedrooms: 2,
-    bathrooms: 1,
-    amenities: ["WiFi", "Kitchen", "Parking", "AC"],
-    coordinates: [-74.006, 40.7128] as [number, number]
-  },
-  {
-    id: 2,
-    title: "Cozy Beach House",
-    location: "Miami, FL",
-    price: 220,
-    rating: 4.9,
-    reviews: 68,
-    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&q=80",
-    host: "Mike Rodriguez",
-    type: "Entire house",
-    guests: 6,
-    bedrooms: 3,
-    bathrooms: 2,
-    amenities: ["WiFi", "Kitchen", "Beach Access", "Pool"],
-    coordinates: [-80.1918, 25.7617] as [number, number]
-  },
-  {
-    id: 3,
-    title: "Mountain Cabin Retreat",
-    location: "Aspen, CO",
-    price: 180,
-    rating: 4.7,
-    reviews: 35,
-    image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=800&q=80",
-    host: "Emma Wilson",
-    type: "Entire cabin",
-    guests: 8,
-    bedrooms: 4,
-    bathrooms: 3,
-    amenities: ["WiFi", "Fireplace", "Hot Tub", "Mountain View"],
-    coordinates: [-106.8175, 39.1911] as [number, number]
-  },
-  {
-    id: 4,
-    title: "Urban Studio",
-    location: "San Francisco, CA",
-    price: 120,
-    rating: 4.6,
-    reviews: 29,
-    image: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?auto=format&fit=crop&w=800&q=80",
-    host: "David Chen",
-    type: "Private room",
-    guests: 2,
-    bedrooms: 1,
-    bathrooms: 1,
-    amenities: ["WiFi", "Kitchen", "Gym", "City View"],
-    coordinates: [-122.4194, 37.7749] as [number, number]
-  }
-];
+import GoogleMap from "@/components/GoogleMap";
+import { useSearchFilters } from "@/hooks/useSearchFilters";
+import { useListings } from "@/hooks/useListings";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [guests, setGuests] = useState(1);
+
+  const { filters, updateFilter, clearFilters } = useSearchFilters();
+  const { listings, loading, fetchListings } = useListings();
+
+  const handleSearch = () => {
+    const searchFilters = {
+      ...filters,
+      location: searchQuery,
+      checkIn,
+      checkOut,
+      guests
+    };
+    fetchListings(searchFilters);
+  };
+
+  const handleApplyFilters = () => {
+    const searchFilters = {
+      ...filters,
+      location: searchQuery,
+      checkIn,
+      checkOut,
+      guests
+    };
+    fetchListings(searchFilters);
+    setShowFilters(false);
+  };
+
+  const handleClearFilters = () => {
+    clearFilters();
+    setSearchQuery("");
+    setCheckIn("");
+    setCheckOut("");
+    setGuests(1);
+    fetchListings();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -119,21 +92,38 @@ const Index = () => {
                   <label className="text-sm font-medium text-gray-700">Check in</label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input type="date" className="pl-10" />
+                    <Input 
+                      type="date" 
+                      className="pl-10"
+                      value={checkIn}
+                      onChange={(e) => setCheckIn(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Check out</label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input type="date" className="pl-10" />
+                    <Input 
+                      type="date" 
+                      className="pl-10"
+                      value={checkOut}
+                      onChange={(e) => setCheckOut(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Guests</label>
                   <div className="relative">
                     <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input placeholder="Add guests" className="pl-10" />
+                    <Input 
+                      type="number"
+                      placeholder="Add guests" 
+                      className="pl-10"
+                      min="1"
+                      value={guests}
+                      onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
+                    />
                   </div>
                 </div>
               </div>
@@ -145,7 +135,10 @@ const Index = () => {
                 >
                   More filters
                 </Button>
-                <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 px-8">
+                <Button 
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 px-8"
+                  onClick={handleSearch}
+                >
                   <Search className="mr-2 h-4 w-4" />
                   Search
                 </Button>
@@ -159,7 +152,13 @@ const Index = () => {
       {showFilters && (
         <div className="bg-white border-b animate-fade-in">
           <div className="container mx-auto px-4 py-6">
-            <SearchFilters />
+            <SearchFilters 
+              filters={filters}
+              onFilterChange={updateFilter}
+              onClearFilters={handleClearFilters}
+              onApplyFilters={handleApplyFilters}
+              listingsCount={listings.length}
+            />
           </div>
         </div>
       )}
@@ -187,28 +186,40 @@ const Index = () => {
         {showMap ? (
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Property Locations</h2>
-            <Map properties={properties} />
+            <GoogleMap listings={listings} />
           </div>
         ) : (
           <div>
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900">Featured Stays</h2>
               <Badge variant="secondary" className="text-sm">
-                {properties.length} properties found
+                {listings.length} properties found
               </Badge>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {properties.map((property, index) => (
-                <div 
-                  key={property.id} 
-                  className="animate-fade-in hover-scale"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <PropertyCard property={property} />
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-64 bg-gray-300 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {listings.map((listing, index) => (
+                  <div 
+                    key={listing.id} 
+                    className="animate-fade-in hover-scale"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <PropertyCard listing={listing} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </section>

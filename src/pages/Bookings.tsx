@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Calendar, MapPin, Users, Clock, CheckCircle, XCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -10,19 +10,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-interface Booking {
+interface BookingWithListing {
   id: string;
   check_in: string;
   check_out: string;
   total_guests: number;
   total_amount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: string;
   created_at: string;
   listing: {
     id: string;
     title: string;
     location: string;
     images: string[];
+    price_per_night: number;
   };
 }
 
@@ -30,7 +31,7 @@ const Bookings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingWithListing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +52,8 @@ const Bookings = () => {
             id,
             title,
             location,
-            images
+            images,
+            price_per_night
           )
         `)
         .eq("guest_id", user?.id)
@@ -164,7 +166,7 @@ const Bookings = () => {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div className="flex items-start space-x-4 mb-4 md:mb-0">
                       <img
-                        src={booking.listing.images[0]}
+                        src={booking.listing.images?.[0] || '/placeholder.svg'}
                         alt={booking.listing.title}
                         className="w-24 h-24 object-cover rounded-lg"
                       />
@@ -199,7 +201,7 @@ const Bookings = () => {
                         </Badge>
                       </div>
                       <p className="text-lg font-semibold text-gray-900">
-                        ${(booking.total_amount / 100).toFixed(0)}
+                        ${Math.round((booking.total_amount || 0) / 100)}
                       </p>
                       <div className="flex space-x-2">
                         <Button

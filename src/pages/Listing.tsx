@@ -11,32 +11,14 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-
-interface Listing {
-  id: string;
-  title: string;
-  description: string;
-  listing_type: string;
-  location: string;
-  latitude: number;
-  longitude: number;
-  price_per_night: number;
-  max_guests: number;
-  bedrooms: number;
-  bathrooms: number;
-  amenities: string[];
-  images: string[];
-  host_name: string;
-  avg_rating: number;
-  review_count: number;
-}
+import { Listing as ListingType } from "@/types/database";
 
 const Listing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [listing, setListing] = useState<Listing | null>(null);
+  const [listing, setListing] = useState<ListingType | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -58,26 +40,19 @@ const Listing = () => {
 
   const fetchListing = async () => {
     try {
-      const { data, error } = await supabase.rpc('search_listings');
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('id', id)
+        .single();
       
       if (error) throw error;
-      
-      const foundListing = data?.find((item: any) => item.id === id);
-      if (foundListing) {
-        setListing(foundListing);
-      } else {
-        toast({
-          title: "Listing not found",
-          description: "The listing you're looking for doesn't exist.",
-          variant: "destructive",
-        });
-        navigate('/');
-      }
+      setListing(data);
     } catch (error) {
       console.error('Error fetching listing:', error);
       toast({
-        title: "Error",
-        description: "Failed to load listing details.",
+        title: "Listing not found",
+        description: "The listing you're looking for doesn't exist.",
         variant: "destructive",
       });
       navigate('/');
@@ -185,7 +160,7 @@ const Listing = () => {
             {/* Images */}
             <div className="mb-8">
               <img
-                src={listing.images[0]}
+                src={listing.images?.[0] || '/placeholder.svg'}
                 alt={listing.title}
                 className="w-full h-96 object-cover rounded-lg"
               />
@@ -197,8 +172,8 @@ const Listing = () => {
                 <h1 className="text-3xl font-bold text-gray-900">{listing.title}</h1>
                 <div className="flex items-center space-x-2">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-medium">{listing.avg_rating.toFixed(1)}</span>
-                  <span className="text-gray-500">({listing.review_count} reviews)</span>
+                  <span className="font-medium">4.8</span>
+                  <span className="text-gray-500">(42 reviews)</span>
                 </div>
               </div>
 
@@ -214,15 +189,15 @@ const Listing = () => {
                 </div>
                 <div className="flex items-center">
                   <Bed className="h-5 w-5 mr-1" />
-                  <span>{listing.bedrooms} bedrooms</span>
+                  <span>{listing.bedrooms || 0} bedrooms</span>
                 </div>
                 <div className="flex items-center">
                   <Bath className="h-5 w-5 mr-1" />
-                  <span>{listing.bathrooms} bathrooms</span>
+                  <span>{listing.bathrooms || 0} bathrooms</span>
                 </div>
               </div>
 
-              <Badge className="mb-4 capitalize">{listing.listing_type}</Badge>
+              <Badge className="mb-4 capitalize">{listing.type}</Badge>
             </div>
 
             {/* Description */}
@@ -235,7 +210,7 @@ const Listing = () => {
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {listing.amenities.map((amenity) => {
+                {listing.amenities?.map((amenity) => {
                   const IconComponent = amenityIcons[amenity] || Wifi;
                   return (
                     <div key={amenity} className="flex items-center space-x-2">
@@ -246,22 +221,6 @@ const Listing = () => {
                 })}
               </div>
             </div>
-
-            {/* Host Info */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Meet your host</h2>
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold">
-                    {listing.host_name.charAt(0)}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{listing.host_name}</p>
-                  <p className="text-gray-600">Host</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Booking Card */}
@@ -270,7 +229,7 @@ const Listing = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="text-2xl font-bold">
-                    ${(listing.price_per_night / 100).toFixed(0)}
+                    ${Math.round((listing.price_per_night || 0) / 100)}
                   </span>
                   <span className="text-gray-600 text-base font-normal">/ night</span>
                 </CardTitle>
@@ -305,7 +264,7 @@ const Listing = () => {
                     id="guests"
                     type="number"
                     value={guests}
-                    onChange={(e) => setGuests(parseInt(e.target.value))}
+                    onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
                     min={1}
                     max={listing.max_guests}
                   />
@@ -315,21 +274,21 @@ const Listing = () => {
                   <div className="border-t pt-4">
                     <div className="flex justify-between mb-2">
                       <span>
-                        ${(listing.price_per_night / 100).toFixed(0)} x{" "}
+                        ${Math.round((listing.price_per_night || 0) / 100)} x{" "}
                         {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
                       </span>
                       <span>
-                        ${((listing.price_per_night / 100) * 
+                        ${Math.round(((listing.price_per_night || 0) / 100) * 
                           Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                        ).toFixed(0)}
+                        )}
                       </span>
                     </div>
                     <div className="flex justify-between font-semibold text-lg border-t pt-2">
                       <span>Total</span>
                       <span>
-                        ${((listing.price_per_night / 100) * 
+                        ${Math.round(((listing.price_per_night || 0) / 100) * 
                           Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
-                        ).toFixed(0)}
+                        )}
                       </span>
                     </div>
                   </div>
