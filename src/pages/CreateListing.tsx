@@ -119,7 +119,7 @@ const CreateListing = () => {
 
     try {
       const { data, error } = await supabase
-        .from('listings')
+        .from("listings")
         .insert({
           host_id: user.id,
           title: formData.title,
@@ -146,9 +146,9 @@ const CreateListing = () => {
         description: "Your listing has been created successfully.",
       });
 
-      navigate('/host');
+      navigate("/host");
     } catch (error) {
-      console.error('Error creating listing:', error);
+      console.error("Error creating listing:", error);
       toast({
         title: "Error",
         description: "Failed to create listing. Please try again.",

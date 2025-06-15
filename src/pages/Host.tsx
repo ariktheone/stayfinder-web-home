@@ -55,30 +55,30 @@ const Host = () => {
     try {
       // Fetch host listings
       const { data: listingsData, error: listingsError } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('host_id', user?.id)
-        .order('created_at', { ascending: false });
+        .from("listings")
+        .select("*")
+        .eq("host_id", user?.id)
+        .order("created_at", { ascending: false });
 
       if (listingsError) throw listingsError;
       setListings(listingsData || []);
 
       // Fetch booking summary
       const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
+        .from("bookings")
         .select(`
           *,
           listing:listings!inner(host_id)
         `)
-        .eq('listing.host_id', user?.id);
+        .eq("listing.host_id", user?.id);
 
       if (bookingsError) throw bookingsError;
 
       const summary = (bookingsData || []).reduce((acc, booking) => {
         acc.total_bookings++;
-        if (booking.status === 'confirmed') acc.confirmed_bookings++;
-        if (booking.status === 'pending') acc.pending_bookings++;
-        if (booking.status === 'confirmed' || booking.status === 'completed') {
+        if (booking.status === "confirmed") acc.confirmed_bookings++;
+        if (booking.status === "pending") acc.pending_bookings++;
+        if (booking.status === "confirmed" || booking.status === "completed") {
           acc.total_revenue += booking.total_amount;
         }
         return acc;
@@ -91,7 +91,7 @@ const Host = () => {
 
       setBookingSummary(summary);
     } catch (error) {
-      console.error('Error fetching host data:', error);
+      console.error("Error fetching host data:", error);
       toast({
         title: "Error",
         description: "Failed to load your host dashboard.",
@@ -105,20 +105,20 @@ const Host = () => {
   const toggleListingStatus = async (listingId: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
-        .from('listings')
+        .from("listings")
         .update({ is_active: !currentStatus })
-        .eq('id', listingId);
+        .eq("id", listingId);
 
       if (error) throw error;
 
       toast({
         title: "Listing updated",
-        description: `Listing ${!currentStatus ? 'activated' : 'deactivated'} successfully.`,
+        description: `Listing ${!currentStatus ? "activated" : "deactivated"} successfully.`,
       });
 
       fetchHostData();
     } catch (error) {
-      console.error('Error updating listing:', error);
+      console.error("Error updating listing:", error);
       toast({
         title: "Error",
         description: "Failed to update listing status.",
@@ -128,13 +128,13 @@ const Host = () => {
   };
 
   const deleteListing = async (listingId: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
+    if (!confirm("Are you sure you want to delete this listing?")) return;
 
     try {
       const { error } = await supabase
-        .from('listings')
+        .from("listings")
         .delete()
-        .eq('id', listingId);
+        .eq("id", listingId);
 
       if (error) throw error;
 
@@ -145,7 +145,7 @@ const Host = () => {
 
       fetchHostData();
     } catch (error) {
-      console.error('Error deleting listing:', error);
+      console.error("Error deleting listing:", error);
       toast({
         title: "Error",
         description: "Failed to delete listing.",

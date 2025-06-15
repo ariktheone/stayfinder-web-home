@@ -44,7 +44,7 @@ const Bookings = () => {
   const fetchBookings = async () => {
     try {
       const { data, error } = await supabase
-        .from('bookings')
+        .from("bookings")
         .select(`
           *,
           listing:listings (
@@ -54,13 +54,13 @@ const Bookings = () => {
             images
           )
         `)
-        .eq('guest_id', user?.id)
-        .order('created_at', { ascending: false });
+        .eq("guest_id", user?.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setBookings(data || []);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
+      console.error("Error fetching bookings:", error);
       toast({
         title: "Error",
         description: "Failed to load your bookings.",
@@ -74,9 +74,9 @@ const Bookings = () => {
   const cancelBooking = async (bookingId: string) => {
     try {
       const { error } = await supabase
-        .from('bookings')
-        .update({ status: 'cancelled' })
-        .eq('id', bookingId);
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", bookingId);
 
       if (error) throw error;
 
@@ -87,7 +87,7 @@ const Bookings = () => {
 
       fetchBookings();
     } catch (error) {
-      console.error('Error cancelling booking:', error);
+      console.error("Error cancelling booking:", error);
       toast({
         title: "Error",
         description: "Failed to cancel booking.",

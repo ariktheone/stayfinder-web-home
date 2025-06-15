@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CreditCard, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,14 +51,13 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Update booking status to confirmed
     const { error } = await supabase
-      .from('bookings')
-      .update({ status: 'confirmed' })
-      .eq('id', bookingId);
+      .from("bookings")
+      .update({ status: "confirmed" })
+      .eq("id", bookingId);
 
     if (error) {
-      console.error('Error updating booking:', error);
+      console.error("Error updating booking:", error);
       toast({
         title: "Payment Error",
         description: "There was an issue processing your payment.",
@@ -68,14 +66,13 @@ const StripePayment = ({ bookingId, amount, onSuccess }: StripePaymentProps) => 
       return;
     }
 
-    // Create payment record
     await supabase
-      .from('payments')
+      .from("payments")
       .insert({
         booking_id: bookingId,
         amount: amount,
-        currency: 'usd',
-        status: 'paid',
+        currency: "usd",
+        status: "paid",
         stripe_payment_intent_id: `pi_mock_${Date.now()}`
       });
 
