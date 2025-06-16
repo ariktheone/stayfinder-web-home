@@ -24,12 +24,12 @@ const SearchResults = ({
 }: SearchResultsProps) => {
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl mb-4"></div>
-              <div className="space-y-3">
+              <div className="h-48 sm:h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl sm:rounded-2xl mb-4"></div>
+              <div className="space-y-3 px-2">
                 <div className="h-4 bg-gray-300 rounded-full w-3/4"></div>
                 <div className="h-4 bg-gray-300 rounded-full w-1/2"></div>
                 <div className="h-4 bg-gray-300 rounded-full w-1/4"></div>
@@ -43,27 +43,28 @@ const SearchResults = ({
 
   if (listings.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-3 sm:px-4 py-12 sm:py-16">
         <div className="text-center max-w-md mx-auto">
-          <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-            <MapPin className="h-12 w-12 text-gray-400" />
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+            <MapPin className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
           </div>
-          <h3 className="text-2xl font-semibold text-gray-700 mb-3">
+          <h3 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-3">
             No stays found
           </h3>
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-500 mb-8 text-sm sm:text-base">
             Try adjusting your search criteria or explore different locations
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col gap-3 w-full">
             <Button
               onClick={onBackToHome}
-              className="bg-gradient-to-r from-rose-500 to-blue-500 hover:from-rose-600 hover:to-blue-600 text-white"
+              className="w-full bg-gradient-to-r from-rose-500 to-blue-500 hover:from-rose-600 hover:to-blue-600 text-white h-12 touch-target"
             >
               Explore All Stays
             </Button>
             <Button
               variant="outline"
               onClick={onClearFilters}
+              className="w-full h-12 touch-target"
             >
               Clear Filters
             </Button>
@@ -74,26 +75,28 @@ const SearchResults = ({
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Results Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {listings.length} stays found
-          </h3>
-          {currentFilters?.location && (
-            <p className="text-gray-600">in {currentFilters.location}</p>
-          )}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+              {listings.length} {listings.length === 1 ? 'stay' : 'stays'} found
+            </h3>
+            {currentFilters?.location && (
+              <p className="text-gray-600 text-sm sm:text-base">in {currentFilters.location}</p>
+            )}
+          </div>
         </div>
 
-        {/* Sort Options */}
-        <div className="flex items-center space-x-3">
-          <span className="text-sm text-gray-600">Sort by:</span>
+        {/* Sort Options - Mobile responsive */}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm text-gray-600 whitespace-nowrap">Sort by:</span>
           <Select
             value={currentFilters?.sortBy || 'price_low'}
             onValueChange={onUpdateSort}
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="flex-1 max-w-48 h-12 touch-target">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -106,8 +109,8 @@ const SearchResults = ({
         </div>
       </div>
 
-      {/* Results Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Results Grid - Mobile optimized */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {listings.map((listing, index) => (
           <div 
             key={listing.id} 
@@ -119,10 +122,10 @@ const SearchResults = ({
         ))}
       </div>
 
-      {/* Load More or Pagination could go here */}
+      {/* Results summary */}
       {listings.length > 0 && (
-        <div className="text-center mt-12">
-          <p className="text-gray-500">
+        <div className="text-center mt-8 sm:mt-12">
+          <p className="text-gray-500 text-sm sm:text-base">
             Showing {listings.length} of {listings.length} properties
           </p>
         </div>
