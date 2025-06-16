@@ -65,7 +65,15 @@ const EnhancedSearchFilters = ({
       checkIn: checkInDate ? format(checkInDate, 'yyyy-MM-dd') : '',
       checkOut: checkOutDate ? format(checkOutDate, 'yyyy-MM-dd') : '',
     };
+    console.log('Executing search with filters:', searchFilters);
     onSearch(searchFilters);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -114,32 +122,34 @@ const EnhancedSearchFilters = ({
     return (
       <div className="w-full mobile-optimized">
         {/* Mobile-first compact layout */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl shadow-sm border touch-manipulation">
+        <div className="flex flex-col gap-3 p-3 bg-white rounded-xl shadow-sm border touch-manipulation">
           {/* Location Search - Full width on mobile */}
-          <div className="flex-1 min-w-0 w-full sm:min-w-[200px]">
+          <div className="w-full">
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none z-10" />
               <Input
                 placeholder="Where to?"
                 value={filters.location}
                 onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
-                className="pl-10 h-12 sm:h-11 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
+                onKeyPress={handleKeyPress}
+                className="pl-10 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target w-full"
               />
             </div>
           </div>
 
-          {/* Mobile row for guests and filters */}
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          {/* Mobile row for guests, filters and search */}
+          <div className="flex items-center gap-2 w-full">
             {/* Guests - Smaller on mobile */}
-            <div className="w-20 sm:w-24">
+            <div className="flex-shrink-0 w-20">
               <div className="relative">
-                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
+                <Users className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none z-10" />
                 <Input
                   type="number"
                   min="1"
                   value={filters.guests}
                   onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
-                  className="pl-10 h-12 sm:h-11 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
+                  onKeyPress={handleKeyPress}
+                  className="pl-8 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target w-full"
                 />
               </div>
             </div>
@@ -149,10 +159,10 @@ const EnhancedSearchFilters = ({
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline" 
-                  className="h-12 sm:h-11 relative border-gray-200 touch-target flex-shrink-0 px-3 sm:px-4"
+                  className="h-12 relative border-gray-200 touch-target flex-shrink-0 px-3"
+                  type="button"
                 >
-                  <Filter className="h-4 w-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Filters</span>
+                  <Filter className="h-4 w-4" />
                   {hasActiveFilters() && (
                     <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {[
@@ -171,12 +181,12 @@ const EnhancedSearchFilters = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-screen sm:w-96 p-4 sm:p-6 mx-4 sm:mx-0 max-h-[80vh] overflow-y-auto mobile-optimized" 
+                className="w-[90vw] max-w-sm p-4 mx-2 max-h-[80vh] overflow-y-auto mobile-optimized" 
                 align="end"
                 side="bottom"
                 sideOffset={8}
               >
-                <div className="space-y-4 sm:space-y-6">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-gray-900 text-lg">Filters</h3>
                     {hasActiveFilters() && (
@@ -187,7 +197,7 @@ const EnhancedSearchFilters = ({
                   </div>
 
                   {/* Dates - Mobile optimized */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-sm font-medium text-gray-700 mb-2 block">Check-in</Label>
                       <Popover>
@@ -195,6 +205,7 @@ const EnhancedSearchFilters = ({
                           <Button 
                             variant="outline" 
                             className="w-full justify-start text-left font-normal touch-target h-12"
+                            type="button"
                           >
                             <Calendar className="mr-2 h-4 w-4" />
                             {checkInDate ? format(checkInDate, "MMM dd") : "Date"}
@@ -218,6 +229,7 @@ const EnhancedSearchFilters = ({
                           <Button 
                             variant="outline" 
                             className="w-full justify-start text-left font-normal touch-target h-12"
+                            type="button"
                           >
                             <Calendar className="mr-2 h-4 w-4" />
                             {checkOutDate ? format(checkOutDate, "MMM dd") : "Date"}
@@ -285,10 +297,12 @@ const EnhancedSearchFilters = ({
                   {/* Apply Button */}
                   <Button 
                     onClick={handleSearch} 
+                    disabled={loading}
                     className="w-full bg-rose-500 hover:bg-rose-600 text-white h-12 touch-target"
+                    type="button"
                   >
                     <Search className="mr-2 h-4 w-4" />
-                    Apply Filters
+                    {loading ? 'Searching...' : 'Apply Filters'}
                   </Button>
                 </div>
               </PopoverContent>
@@ -298,11 +312,11 @@ const EnhancedSearchFilters = ({
             <Button 
               onClick={handleSearch} 
               disabled={loading}
-              className="bg-rose-500 hover:bg-rose-600 text-white h-12 sm:h-11 px-4 sm:px-6 touch-target flex-shrink-0"
+              className="bg-rose-500 hover:bg-rose-600 text-white h-12 px-4 touch-target flex-1 min-w-0"
+              type="button"
             >
-              <Search className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">{loading ? 'Searching...' : 'Search'}</span>
-              <span className="sm:hidden">{loading ? '...' : 'Go'}</span>
+              <Search className="mr-1 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">{loading ? 'Searching...' : 'Search'}</span>
             </Button>
           </div>
         </div>
@@ -323,6 +337,7 @@ const EnhancedSearchFilters = ({
               placeholder="Search destinations"
               value={filters.location}
               onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+              onKeyPress={handleKeyPress}
               className="pl-10 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
             />
           </div>
@@ -336,6 +351,7 @@ const EnhancedSearchFilters = ({
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-left font-normal h-12 border-gray-200 touch-target"
+                type="button"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {checkInDate ? format(checkInDate, "MMM dd") : "Add dates"}
@@ -361,6 +377,7 @@ const EnhancedSearchFilters = ({
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-left font-normal h-12 border-gray-200 touch-target"
+                type="button"
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 {checkOutDate ? format(checkOutDate, "MMM dd") : "Add dates"}
@@ -388,6 +405,7 @@ const EnhancedSearchFilters = ({
               min="1"
               value={filters.guests}
               onChange={(e) => setFilters(prev => ({ ...prev, guests: parseInt(e.target.value) || 1 }))}
+              onKeyPress={handleKeyPress}
               className="pl-10 h-12 border-gray-200 focus:border-rose-300 text-base mobile-optimized touch-target"
             />
           </div>
@@ -401,6 +419,7 @@ const EnhancedSearchFilters = ({
             variant="outline"
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="flex items-center justify-center space-x-2 h-12 sm:h-auto touch-target"
+            type="button"
           >
             <SlidersHorizontal className="h-4 w-4" />
             <span>More filters</span>
@@ -422,7 +441,7 @@ const EnhancedSearchFilters = ({
           </Button>
           
           {hasActiveFilters() && (
-            <Button variant="ghost" onClick={clearFilters} className="text-gray-500 h-12 sm:h-auto touch-target">
+            <Button variant="ghost" onClick={clearFilters} className="text-gray-500 h-12 sm:h-auto touch-target" type="button">
               Clear all
             </Button>
           )}
@@ -453,6 +472,7 @@ const EnhancedSearchFilters = ({
             onClick={handleSearch} 
             disabled={loading}
             className="bg-rose-500 hover:bg-rose-600 text-white px-6 sm:px-8 h-12 touch-target"
+            type="button"
           >
             <Search className="mr-2 h-4 w-4" />
             {loading ? 'Searching...' : 'Search'}
