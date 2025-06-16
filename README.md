@@ -347,6 +347,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ by the StayFinder Team**
 
-For more information, visit our [website](https://stayfinder.com) or follow us on [Twitter](https://twitter.com/stayfinder).
