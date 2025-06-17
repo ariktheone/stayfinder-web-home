@@ -27,7 +27,7 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
     if (!user) return;
 
     try {
-      // Get user's default wishlist with proper query format
+      // Get user's default wishlist
       const { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
@@ -74,7 +74,7 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
     setLoading(true);
 
     try {
-      // Get user's default wishlist
+      // Get or create user's default wishlist
       let { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
@@ -96,7 +96,7 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
             name: 'My Wishlist',
             is_default: true
           })
-          .select()
+          .select('id')
           .single();
 
         if (createError) {

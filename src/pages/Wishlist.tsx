@@ -10,12 +10,6 @@ import PropertyCard from "@/components/PropertyCard";
 import { Heart, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Type for the Supabase query response - listings comes as an array from the relationship
-interface WishlistItemWithListing {
-  id: string;
-  listings: Listing[];
-}
-
 const Wishlist = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -38,9 +32,10 @@ const Wishlist = () => {
 
     try {
       setLoading(true);
+      console.log('Fetching wishlist for user:', user.id);
       
-      // Get user's default wishlist with better error handling
-      const { data: wishlist, error: wishlistError } = await supabase
+      // First, get or create the user's default wishlist
+      let { data: wishlist, error: wishlistError } = await supabase
         .from('wishlists')
         .select('id')
         .eq('user_id', user.id)
@@ -49,62 +44,79 @@ const Wishlist = () => {
 
       if (wishlistError) {
         console.error('Error fetching wishlist:', wishlistError);
-        toast({
-          title: "Error",
-          description: "Failed to load wishlist",
-          variant: "destructive",
-        });
+        throw wishlistError;
+      }
+
+      // If no default wishlist exists, create one
+      if (!wishlist) {
+        console.log('Creating default wishlist for user');
+        const { data: newWishlist, error: createError } = await supabase
+          .from('wishlists')
+          .insert({
+            user_id: user.id,
+            name: 'My Wishlist',
+            is_default: true
+          })
+          .select('id')
+          .single();
+
+        if (createError) {
+          console.error('Error creating wishlist:', createError);
+          throw createError;
+        }
+        wishlist = newWishlist;
+      }
+
+      console.log('Found wishlist:', wishlist.id);
+
+      // Get wishlist items with their associated listings
+      const { data: wishlistItemsData, error: itemsError } = await supabase
+        .from('wishlist_items')
+        .select(`
+          id,
+          listing_id,
+          created_at
+        `)
+        .eq('wishlist_id', wishlist.id)
+        .order('created_at', { ascending: false });
+
+      if (itemsError) {
+        console.error('Error fetching wishlist items:', itemsError);
+        throw itemsError;
+      }
+
+      console.log('Found wishlist items:', wishlistItemsData?.length || 0);
+
+      if (!wishlistItemsData || wishlistItemsData.length === 0) {
+        setWishlistItems([]);
         return;
       }
 
-      if (wishlist) {
-        // Get wishlist items with listing details
-        const { data, error } = await supabase
-          .from('wishlist_items')
-          .select(`
-            id,
-            listings (
-              id,
-              host_id,
-              title,
-              description,
-              location,
-              latitude,
-              longitude,
-              price_per_night,
-              max_guests,
-              bedrooms,
-              bathrooms,
-              amenities,
-              images,
-              type,
-              created_at,
-              updated_at
-            )
-          `)
-          .eq('wishlist_id', wishlist.id)
-          .order('created_at', { ascending: false });
+      // Get the actual listing details
+      const listingIds = wishlistItemsData.map(item => item.listing_id);
+      const { data: listings, error: listingsError } = await supabase
+        .from('listings')
+        .select('*')
+        .in('id', listingIds);
 
-        if (error) {
-          console.error('Error fetching wishlist items:', error);
-          throw error;
-        }
-
-        // Extract listings from the nested structure - listings is an array, so take the first item
-        const listings: Listing[] = (data as WishlistItemWithListing[])
-          ?.map(item => item.listings[0]) // Take first listing from array
-          .filter((listing): listing is Listing => listing !== null && listing !== undefined) || [];
-        
-        setWishlistItems(listings);
-      } else {
-        // No wishlist found, set empty array
-        setWishlistItems([]);
+      if (listingsError) {
+        console.error('Error fetching listings:', listingsError);
+        throw listingsError;
       }
+
+      console.log('Found listings:', listings?.length || 0);
+      
+      // Order listings according to wishlist item creation order
+      const orderedListings = wishlistItemsData
+        .map(item => listings?.find(listing => listing.id === item.listing_id))
+        .filter((listing): listing is Listing => listing !== undefined);
+
+      setWishlistItems(orderedListings);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
       toast({
         title: "Error",
-        description: "Failed to load wishlist",
+        description: "Failed to load wishlist. Please try again.",
         variant: "destructive",
       });
     } finally {
