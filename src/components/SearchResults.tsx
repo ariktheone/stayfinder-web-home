@@ -3,7 +3,7 @@ import { MapPin, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Listing, SearchFilters } from "@/types/database";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PropertyCard from "./PropertyCard";
+import OptimizedPropertyCard from "./OptimizedPropertyCard";
 
 interface SearchResultsProps {
   listings: Listing[];
@@ -106,7 +106,7 @@ const SearchResults = ({
         </div>
       </div>
 
-      {/* Results Grid */}
+      {/* Results Grid with Optimized Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {listings.map((listing, index) => (
           <div 
@@ -114,16 +114,16 @@ const SearchResults = ({
             className="animate-fade-in"
             style={{ animationDelay: `${index * 0.05}s` }}
           >
-            <PropertyCard listing={listing} />
+            <OptimizedPropertyCard listing={listing} priority={index < 4} />
           </div>
         ))}
       </div>
 
-      {/* Load More or Pagination could go here */}
+      {/* Results Summary */}
       {listings.length > 0 && (
         <div className="text-center mt-12">
           <p className="text-gray-500">
-            Showing {listings.length} of {listings.length} properties
+            Showing {listings.length} properties
           </p>
         </div>
       )}

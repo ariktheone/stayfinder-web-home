@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Listing, SearchFilters } from "@/types/database";
-import { useListings } from "@/hooks/useListings";
+import { useOptimizedSearch } from "@/hooks/useOptimizedSearch";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -11,51 +11,35 @@ import CompactSearchHeader from "@/components/CompactSearchHeader";
 import PropertyCard from "@/components/PropertyCard";
 
 const Index = () => {
-  const { listings, loading, fetchListings } = useListings();
-  const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+  const { listings, allListings, loading, fetchListings } = useOptimizedSearch();
   const [hasSearched, setHasSearched] = useState(false);
   const [currentFilters, setCurrentFilters] = useState<SearchFilters | null>(null);
-  const [originalListings, setOriginalListings] = useState<Listing[]>([]);
 
-  // Store original listings when they're first loaded
-  useEffect(() => {
-    if (listings.length > 0 && originalListings.length === 0) {
-      setOriginalListings(listings);
-    }
-  }, [listings, originalListings.length]);
-
-  const applySorting = (listingsToSort: Listing[], sortBy: string) => {
-    let sorted = [...listingsToSort];
+  // Memoized sort function
+  const applySorting = useCallback((listingsToSort: Listing[], sortBy: string) => {
+    const sorted = [...listingsToSort];
     switch (sortBy) {
       case 'price_low':
-        sorted.sort((a, b) => a.price_per_night - b.price_per_night);
-        break;
+        return sorted.sort((a, b) => a.price_per_night - b.price_per_night);
       case 'price_high':
-        sorted.sort((a, b) => b.price_per_night - a.price_per_night);
-        break;
+        return sorted.sort((a, b) => b.price_per_night - a.price_per_night);
       case 'rating':
-        // For now, we'll use a random rating since we don't have real ratings yet
-        sorted.sort(() => Math.random() - 0.5);
-        break;
+        return sorted.sort(() => Math.random() - 0.5);
       default:
-        break;
+        return sorted;
     }
-    return sorted;
-  };
+  }, []);
 
-  const handleSearch = async (filters: SearchFilters) => {
+  // Optimized search handler
+  const handleSearch = useCallback(async (filters: SearchFilters) => {
     console.log('Searching with filters:', filters);
     setHasSearched(true);
     setCurrentFilters(filters);
-    
-    try {
-      await fetchListings(filters);
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
+    await fetchListings(filters);
+  }, [fetchListings]);
 
-  const handleDestinationClick = async (location: string) => {
+  // Optimized destination click handler
+  const handleDestinationClick = useCallback(async (location: string) => {
     console.log('Destination clicked:', location);
     const destinationFilters: SearchFilters = {
       location: location,
@@ -70,34 +54,24 @@ const Index = () => {
       sortBy: 'price_low'
     };
     
-    // Set the search state immediately
     setHasSearched(true);
     setCurrentFilters(destinationFilters);
-    
-    try {
-      await fetchListings(destinationFilters);
-    } catch (error) {
-      console.error('Destination search error:', error);
-    }
-  };
+    await fetchListings(destinationFilters);
+  }, [fetchListings]);
 
-  // Apply sorting when listings change after search
-  useEffect(() => {
-    if (hasSearched && listings.length >= 0 && currentFilters) {
-      const sorted = applySorting(listings, currentFilters.sortBy || 'price_low');
-      setFilteredListings(sorted);
-    }
-  }, [listings, hasSearched, currentFilters]);
+  // Memoized sorted listings
+  const sortedListings = useMemo(() => {
+    if (!currentFilters?.sortBy) return listings;
+    return applySorting(listings, currentFilters.sortBy);
+  }, [listings, currentFilters?.sortBy, applySorting]);
 
-  const handleBackToHome = async () => {
+  const handleBackToHome = useCallback(async () => {
     setHasSearched(false);
-    setFilteredListings([]);
     setCurrentFilters(null);
-    // Reset to original listings by fetching all listings without filters
     await fetchListings();
-  };
+  }, [fetchListings]);
 
-  const handleClearFilters = async () => {
+  const handleClearFilters = useCallback(async () => {
     const emptyFilters: SearchFilters = {
       location: '',
       checkIn: '',
@@ -111,19 +85,24 @@ const Index = () => {
       sortBy: 'price_low'
     };
     await handleSearch(emptyFilters);
-  };
+  }, [handleSearch]);
 
-  const handleUpdateSort = (sortBy: 'price_low' | 'price_high' | 'rating' | 'distance') => {
+  const handleUpdateSort = useCallback((sortBy: 'price_low' | 'price_high' | 'rating' | 'distance') => {
     if (currentFilters) {
       const updatedFilters: SearchFilters = { ...currentFilters, sortBy };
       setCurrentFilters(updatedFilters);
-      const sorted = applySorting(filteredListings, sortBy);
-      setFilteredListings(sorted);
     }
-  };
+  }, [currentFilters]);
 
-  // Use filteredListings when searched, otherwise use original listings for featured section
-  const displayListings = hasSearched ? filteredListings : (originalListings.length > 0 ? originalListings : listings);
+  // Memoized display listings
+  const displayListings = useMemo(() => {
+    return hasSearched ? sortedListings : allListings;
+  }, [hasSearched, sortedListings, allListings]);
+
+  // Memoized featured listings
+  const featuredListings = useMemo(() => {
+    return allListings.slice(0, 8);
+  }, [allListings]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 mobile-optimized safe-area-top safe-area-bottom">
@@ -160,9 +139,9 @@ const Index = () => {
                     </div>
                   ))}
                 </div>
-              ) : displayListings.length > 0 ? (
+              ) : featuredListings.length > 0 ? (
                 <div className="property-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 px-1 sm:px-2">
-                  {displayListings.slice(0, 8).map((listing, index) => (
+                  {featuredListings.map((listing, index) => (
                     <div 
                       key={listing.id} 
                       className="animate-fade-in touch-manipulation"
