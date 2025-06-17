@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Listing, SearchFilters } from "@/types/database";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import OptimizedPropertyCard from "./OptimizedPropertyCard";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface SearchResultsProps {
   listings: Listing[];
@@ -25,6 +26,10 @@ const SearchResults = ({
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <LoadingSpinner size="lg" />
+          <p className="text-gray-600 mt-4">Finding perfect stays for you...</p>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="animate-pulse">
@@ -52,7 +57,7 @@ const SearchResults = ({
             No stays found
           </h3>
           <p className="text-gray-500 mb-8">
-            Try adjusting your search criteria or explore different locations
+            Try adjusting your search criteria or explore different locations to find the perfect stay.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
@@ -106,7 +111,7 @@ const SearchResults = ({
         </div>
       </div>
 
-      {/* Results Grid with Optimized Cards */}
+      {/* Results Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {listings.map((listing, index) => (
           <div 
@@ -123,7 +128,7 @@ const SearchResults = ({
       {listings.length > 0 && (
         <div className="text-center mt-12">
           <p className="text-gray-500">
-            Showing {listings.length} properties
+            Showing {listings.length} {listings.length === 1 ? 'property' : 'properties'}
           </p>
         </div>
       )}
