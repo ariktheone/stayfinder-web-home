@@ -33,8 +33,8 @@ const SearchResults = ({
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))}
@@ -45,7 +45,7 @@ const SearchResults = ({
 
   if (!listings.length) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
         <EmptyState 
           type="search" 
           onAction={onClearFilters}
@@ -70,86 +70,103 @@ const SearchResults = ({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* View Toggle and Sort */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {listings.length} {listings.length === 1 ? 'property' : 'properties'} found
-          </h2>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          {/* Sort Dropdown */}
-          {onUpdateSort && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                  <ArrowUpDown className="h-4 w-4" />
-                  <span>{getSortLabel()}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onUpdateSort('price_low')}>
-                  Price: Low to High
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onUpdateSort('price_high')}>
-                  Price: High to Low
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onUpdateSort('rating')}>
-                  Rating
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onUpdateSort('distance')}>
-                  Distance
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        {/* View Toggle and Sort - Optimized for Mobile */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+              {listings.length} {listings.length === 1 ? 'property' : 'properties'}
+            </h2>
+          </div>
           
-          {/* View Toggle */}
-          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className="h-8 w-8 p-0"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="h-8 w-8 p-0"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
+            {/* Sort Dropdown */}
+            {onUpdateSort && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center space-x-2 touch-target">
+                    <ArrowUpDown className="h-4 w-4" />
+                    <span className="hidden sm:inline">{getSortLabel()}</span>
+                    <span className="sm:hidden">Sort</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => onUpdateSort('price_low')}>
+                    Price: Low to High
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onUpdateSort('price_high')}>
+                    Price: High to Low
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onUpdateSort('rating')}>
+                    Rating
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onUpdateSort('distance')}>
+                    Distance
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            {/* View Toggle */}
+            <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="h-8 w-8 p-0 touch-target"
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="h-8 w-8 p-0 touch-target"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Results Grid/List */}
-      <div className={cn(
-        "transition-all duration-300",
-        viewMode === "grid" 
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          : "space-y-4"
-      )}>
-        {listings.map((listing, index) => (
-          <div
-            key={listing.id}
-            className={cn(
-              "animate-fade-in",
-              viewMode === "list" && "max-w-none"
-            )}
-            style={{ animationDelay: `${index * 100}ms` }}
-          >
-            <OptimizedPropertyCard 
-              listing={listing} 
-              priority={index < 4}
-            />
+        {/* Results Grid/List - Optimized Layout */}
+        <div className={cn(
+          "transition-all duration-300",
+          viewMode === "grid" 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
+            : "space-y-4"
+        )}>
+          {listings.map((listing, index) => (
+            <div
+              key={listing.id}
+              className={cn(
+                "animate-fade-in touch-manipulation",
+                viewMode === "list" && "max-w-none"
+              )}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <OptimizedPropertyCard 
+                listing={listing} 
+                priority={index < 6}
+                variant={viewMode === "list" ? "horizontal" : "vertical"}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Load More Button - For Future Enhancement */}
+        {listings.length > 0 && listings.length % 12 === 0 && (
+          <div className="flex justify-center mt-8 sm:mt-12">
+            <Button 
+              variant="outline" 
+              className="px-6 sm:px-8 py-2 sm:py-3 touch-target"
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : 'Load More Properties'}
+            </Button>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -1,42 +1,36 @@
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 9% 17%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.75rem;
-
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -44,45 +38,42 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217.2 10.6% 64.9%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary: 224.3 76.3% 94.1%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217.2 10.6% 64.9%;
   }
 }
 
@@ -90,25 +81,30 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
   }
+}
 
-  /* Mobile optimization for iOS and Android */
-  html {
-    -webkit-text-size-adjust: 100%;
+@layer utilities {
+  /* Mobile Optimizations */
+  .mobile-optimized {
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
-  /* Prevent horizontal scrolling and improve touch behavior */
-  body {
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 
-  /* Safe area support for modern devices */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
   .safe-area-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -117,76 +113,82 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .safe-area-left {
-    padding-left: env(safe-area-inset-left);
+  /* Smooth Scrolling */
+  .smooth-scroll {
+    scroll-behavior: smooth;
   }
 
-  .safe-area-right {
-    padding-right: env(safe-area-inset-right);
+  /* Scroll Snap */
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
   }
-}
 
-/* Custom animations and utilities */
-@layer utilities {
+  .scroll-snap-start {
+    scroll-snap-align: start;
+  }
+
+  /* Animation Classes */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out forwards;
   }
-  
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
   .animate-scale-in {
-    animation: scaleIn 0.4s ease-out forwards;
-  }
-  
-  .hover-scale {
-    transition: transform 0.2s ease-out;
-  }
-  
-  .hover-scale:hover {
-    transform: scale(1.02);
-  }
-  
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    animation: scaleIn 0.3s ease-out forwards;
   }
 
-  /* Mobile-specific utilities */
-  .touch-manipulation {
-    touch-action: manipulation;
+  /* Typography */
+  .mobile-title {
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
-  .safe-area-inset {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+  .mobile-subtitle {
+    line-height: 1.3;
+    letter-spacing: -0.01em;
   }
 
-  /* Improved mobile text rendering */
-  .mobile-optimized {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+  .mobile-text {
+    line-height: 1.5;
   }
 
-  /* Enhanced touch targets for mobile */
-  .touch-target {
-    min-height: 48px;
-    min-width: 48px;
+  /* Responsive Grid */
+  .property-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
 
-  /* Prevent text selection on touch elements */
-  .no-select {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  @media (max-width: 640px) {
+    .property-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Section Spacing */
+  .section-spacing {
+    padding-top: clamp(2rem, 5vw, 4rem);
+    padding-bottom: clamp(2rem, 5vw, 4rem);
   }
 }
 
+/* Keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -205,186 +207,33 @@
   }
 }
 
-/* iPhone specific optimizations */
-@media screen and (max-width: 414px) and (-webkit-min-device-pixel-ratio: 2) {
-  .container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-
-  /* Optimize for iPhone notch and home indicator */
-  .hero-section {
-    padding-top: max(1rem, env(safe-area-inset-top));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-
-  /* Better button sizing for iPhone */
-  button, 
-  [role="button"], 
-  input[type="submit"], 
-  input[type="button"] {
-    min-height: 48px;
-    min-width: 48px;
-    font-size: 16px;
-  }
-
-  /* Prevent zoom on form inputs */
-  input, 
-  textarea, 
-  select {
-    font-size: 16px;
-    transform: scale(1);
-  }
-
-  /* Optimize grid layouts for iPhone */
-  .property-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Samsung Galaxy S8+ and similar Android devices */
-@media screen and (max-width: 414px) and (min-height: 800px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  /* Optimize for taller screens */
-  .hero-content {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-  }
-
-  /* Better spacing for tall screens */
-  .section-spacing {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-  }
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* General mobile improvements (320px to 768px) */
-@media (max-width: 767px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  /* Improve button tap targets */
-  button, 
-  [role="button"], 
-  input[type="submit"], 
-  input[type="button"] {
-    min-height: 48px;
-    min-width: 48px;
-    padding: 12px 16px;
-    border-radius: 8px;
-  }
-
-  /* Better mobile form inputs */
-  input, 
-  textarea, 
-  select {
-    font-size: 16px;
-    padding: 12px 16px;
-    border-radius: 8px;
-  }
-
-  /* Optimize property card grid */
-  .property-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  /* Better mobile navigation */
-  .mobile-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    border-top: 1px solid #e5e7eb;
-    padding: env(safe-area-inset-bottom) 0 0;
-    z-index: 50;
-  }
-
-  /* Improve text readability */
-  .mobile-text {
-    line-height: 1.6;
-    font-size: 16px;
-  }
-
-  .mobile-title {
-    font-size: 24px;
-    line-height: 1.3;
-  }
-
-  .mobile-subtitle {
-    font-size: 18px;
-    line-height: 1.4;
-  }
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
-/* Small mobile devices (iPhone SE, older Android) */
-@media (max-width: 375px) {
-  .container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-
-  /* Adjust font sizes for small screens */
-  .mobile-title {
-    font-size: 20px;
-  }
-
-  .mobile-subtitle {
-    font-size: 16px;
-  }
-
-  /* Optimize grid for very small screens */
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
-/* Tablet improvements (768px to 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-
-  .property-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
-
-  .features-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-  }
+/* Focus Improvements */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
 
-/* Large tablets and small desktops */
-@media (min-width: 1025px) {
-  .property-grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-  }
-
-  .features-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
+/* Backdrop Blur Support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
   }
 }
