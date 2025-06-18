@@ -61,7 +61,11 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
     }
   };
 
-  const toggleWishlist = async () => {
+  const toggleWishlist = async (e: React.MouseEvent) => {
+    // Prevent event bubbling to parent elements
+    e.preventDefault();
+    e.stopPropagation();
+
     if (!user) {
       toast({
         title: "Sign in required",
