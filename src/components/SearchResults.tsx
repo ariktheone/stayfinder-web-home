@@ -34,9 +34,16 @@ const SearchResults = ({
   if (loading) {
     return (
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className={cn(
+          viewMode === "grid" 
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
+            : "space-y-4"
+        )}>
           {Array.from({ length: 8 }).map((_, index) => (
-            <SkeletonCard key={index} />
+            <SkeletonCard 
+              key={index} 
+              variant={viewMode === "list" ? "horizontal" : "vertical"} 
+            />
           ))}
         </div>
       </div>
@@ -135,14 +142,14 @@ const SearchResults = ({
           "transition-all duration-300",
           viewMode === "grid" 
             ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-            : "space-y-4"
+            : "space-y-4 max-w-none"
         )}>
           {listings.map((listing, index) => (
             <div
               key={listing.id}
               className={cn(
                 "animate-fade-in touch-manipulation",
-                viewMode === "list" && "max-w-none"
+                viewMode === "list" && "w-full"
               )}
               style={{ animationDelay: `${index * 50}ms` }}
             >
