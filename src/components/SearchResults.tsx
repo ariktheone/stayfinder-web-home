@@ -137,19 +137,19 @@ const SearchResults = ({
           </div>
         </div>
 
-        {/* Results Grid/List - Optimized Layout */}
+        {/* Results Grid/List - Fixed Height Layout */}
         <div className={cn(
           "transition-all duration-300",
           viewMode === "grid" 
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
-            : "space-y-4 max-w-none"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 auto-rows-fr"
+            : "flex flex-col space-y-4 max-w-none"
         )}>
           {listings.map((listing, index) => (
             <div
               key={listing.id}
               className={cn(
                 "animate-fade-in touch-manipulation",
-                viewMode === "list" && "w-full"
+                viewMode === "list" ? "w-full min-h-[200px] sm:min-h-[240px]" : "h-full"
               )}
               style={{ animationDelay: `${index * 50}ms` }}
             >
