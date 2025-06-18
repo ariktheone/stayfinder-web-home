@@ -34,11 +34,11 @@ const PropertyCard = ({ listing }: PropertyCardProps) => {
 
   return (
     <Card className="cursor-pointer hover:shadow-2xl transition-all duration-300 group relative overflow-hidden bg-white/80 backdrop-blur-sm border-0 shadow-lg hover-scale">
-      <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-        <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-          <WishlistButton listingId={listing.id} />
-        </div>
-      </div>
+      <WishlistButton 
+        listingId={listing.id}
+        variant="floating"
+        className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110"
+      />
 
       <div onClick={handleClick}>
         <div className="relative h-64 overflow-hidden rounded-t-2xl">

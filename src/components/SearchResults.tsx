@@ -1,137 +1,98 @@
 
-import { MapPin, SlidersHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Listing, SearchFilters } from "@/types/database";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { Listing } from "@/types/database";
 import OptimizedPropertyCard from "./OptimizedPropertyCard";
-import LoadingSpinner from "./LoadingSpinner";
+import SkeletonCard from "./SkeletonCard";
+import EmptyState from "./EmptyState";
+import { Button } from "@/components/ui/button";
+import { Grid, List } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SearchResultsProps {
   listings: Listing[];
-  loading: boolean;
-  onBackToHome: () => void;
-  onClearFilters: () => void;
-  currentFilters?: SearchFilters | null;
-  onUpdateSort?: (sortBy: string) => void;
+  loading?: boolean;
+  onClearFilters?: () => void;
 }
 
-const SearchResults = ({ 
-  listings, 
-  loading, 
-  onBackToHome, 
-  onClearFilters, 
-  currentFilters,
-  onUpdateSort 
-}: SearchResultsProps) => {
+const SearchResults = ({ listings, loading = false, onClearFilters }: SearchResultsProps) => {
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <LoadingSpinner size="lg" />
-          <p className="text-gray-600 mt-4">Finding perfect stays for you...</p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl mb-4"></div>
-              <div className="space-y-3">
-                <div className="h-4 bg-gray-300 rounded-full w-3/4"></div>
-                <div className="h-4 bg-gray-300 rounded-full w-1/2"></div>
-                <div className="h-4 bg-gray-300 rounded-full w-1/4"></div>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} />
           ))}
         </div>
       </div>
     );
   }
 
-  if (listings.length === 0) {
+  if (!listings.length) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center max-w-md mx-auto">
-          <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-            <MapPin className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="text-2xl font-semibold text-gray-700 mb-3">
-            No stays found
-          </h3>
-          <p className="text-gray-500 mb-8">
-            Try adjusting your search criteria or explore different locations to find the perfect stay.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              onClick={onBackToHome}
-              className="bg-gradient-to-r from-rose-500 to-blue-500 hover:from-rose-600 hover:to-blue-600 text-white"
-            >
-              Explore All Stays
-            </Button>
-            <Button
-              variant="outline"
-              onClick={onClearFilters}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <EmptyState 
+          type="search" 
+          onAction={onClearFilters}
+        />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Results Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {listings.length} stays found
-          </h3>
-          {currentFilters?.location && (
-            <p className="text-gray-600">in {currentFilters.location}</p>
-          )}
+    <div className="container mx-auto px-4 py-8">
+      {/* View Toggle */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {listings.length} {listings.length === 1 ? 'property' : 'properties'} found
+          </h2>
         </div>
-
-        {/* Sort Options */}
-        <div className="flex items-center space-x-3">
-          <span className="text-sm text-gray-600">Sort by:</span>
-          <Select
-            value={currentFilters?.sortBy || 'price_low'}
-            onValueChange={onUpdateSort}
+        
+        <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+          <Button
+            variant={viewMode === "grid" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+            className="h-8 w-8 p-0"
           >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="price_low">Price: Low to High</SelectItem>
-              <SelectItem value="price_high">Price: High to Low</SelectItem>
-              <SelectItem value="rating">Highest Rated</SelectItem>
-              <SelectItem value="distance">Distance</SelectItem>
-            </SelectContent>
-          </Select>
+            <Grid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+            className="h-8 w-8 p-0"
+          >
+            <List className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* Results Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Results Grid/List */}
+      <div className={cn(
+        "transition-all duration-300",
+        viewMode === "grid" 
+          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          : "space-y-4"
+      )}>
         {listings.map((listing, index) => (
-          <div 
-            key={listing.id} 
-            className="animate-fade-in"
-            style={{ animationDelay: `${index * 0.05}s` }}
+          <div
+            key={listing.id}
+            className={cn(
+              "animate-fade-in",
+              viewMode === "list" && "max-w-none"
+            )}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <OptimizedPropertyCard listing={listing} priority={index < 4} />
+            <OptimizedPropertyCard 
+              listing={listing} 
+              priority={index < 4}
+            />
           </div>
         ))}
       </div>
-
-      {/* Results Summary */}
-      {listings.length > 0 && (
-        <div className="text-center mt-12">
-          <p className="text-gray-500">
-            Showing {listings.length} {listings.length === 1 ? 'property' : 'properties'}
-          </p>
-        </div>
-      )}
     </div>
   );
 };

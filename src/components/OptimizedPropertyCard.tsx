@@ -44,9 +44,11 @@ const OptimizedPropertyCard = memo(({ listing, priority = false }: PropertyCardP
           </Badge>
         </div>
         
-        <div className="absolute top-3 right-3 z-10">
-          <WishlistButton listingId={listing.id} />
-        </div>
+        <WishlistButton 
+          listingId={listing.id} 
+          variant="floating"
+          size="md"
+        />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>

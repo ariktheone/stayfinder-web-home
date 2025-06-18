@@ -5,13 +5,21 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 interface WishlistButtonProps {
   listingId: string;
   className?: string;
+  variant?: "default" | "floating" | "compact";
+  size?: "sm" | "md" | "lg";
 }
 
-const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
+const WishlistButton = ({ 
+  listingId, 
+  className = "", 
+  variant = "default",
+  size = "md"
+}: WishlistButtonProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -154,19 +162,66 @@ const WishlistButton = ({ listingId, className = "" }: WishlistButtonProps) => {
     }
   };
 
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "floating":
+        return "absolute top-3 right-3 z-20 bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg border-0 rounded-full p-2";
+      case "compact":
+        return "bg-transparent hover:bg-white/10 border-0 p-1";
+      default:
+        return "bg-white/90 backdrop-blur-sm hover:bg-white border border-gray-200 shadow-sm";
+    }
+  };
+
+  const getSizeStyles = () => {
+    switch (size) {
+      case "sm":
+        return variant === "floating" ? "h-8 w-8" : "h-8 px-2";
+      case "lg":
+        return variant === "floating" ? "h-12 w-12" : "h-12 px-4";
+      default:
+        return variant === "floating" ? "h-10 w-10" : "h-10 px-3";
+    }
+  };
+
+  const getHeartSize = () => {
+    switch (size) {
+      case "sm":
+        return "h-3 w-3";
+      case "lg":
+        return "h-6 w-6";
+      default:
+        return "h-4 w-4";
+    }
+  };
+
   return (
     <Button
-      variant="outline"
-      size="sm"
       onClick={toggleWishlist}
       disabled={loading}
-      className={className}
+      className={cn(
+        "transition-all duration-300 hover:scale-105 active:scale-95",
+        getVariantStyles(),
+        getSizeStyles(),
+        loading && "opacity-70 cursor-not-allowed",
+        className
+      )}
     >
       <Heart
-        className={`h-4 w-4 ${
-          isInWishlist ? 'fill-red-500 text-red-500' : 'text-gray-500'
-        }`}
+        className={cn(
+          getHeartSize(),
+          "transition-all duration-300",
+          isInWishlist 
+            ? 'fill-red-500 text-red-500 animate-pulse' 
+            : 'text-gray-600 hover:text-red-400',
+          loading && "animate-spin"
+        )}
       />
+      {variant === "default" && size !== "sm" && (
+        <span className="ml-2 text-sm font-medium">
+          {isInWishlist ? "Saved" : "Save"}
+        </span>
+      )}
     </Button>
   );
 };
