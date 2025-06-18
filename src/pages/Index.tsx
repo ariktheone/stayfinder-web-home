@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Listing, SearchFilters } from "@/types/database";
 import { useOptimizedSearch } from "@/hooks/useOptimizedSearch";
@@ -177,7 +176,6 @@ const Index = () => {
           <SearchResults
             listings={displayListings}
             loading={loading}
-            onBackToHome={handleBackToHome}
             onClearFilters={handleClearFilters}
             currentFilters={currentFilters}
             onUpdateSort={handleUpdateSort}

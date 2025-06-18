@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Listing, SearchFilters } from "@/types/database";
 import { useListings } from "@/hooks/useListings";
@@ -95,7 +94,6 @@ const AllListings = () => {
       <SearchResults
         listings={listings}
         loading={loading}
-        onBackToHome={handleBackToHome}
         onClearFilters={handleClearFilters}
         currentFilters={currentFilters}
         onUpdateSort={handleUpdateSort}
